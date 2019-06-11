@@ -92,17 +92,12 @@
   "Makes or remakes (with current cid) a proper card from a server card"
   ([card] (make-card card (make-cid)))
   ([card cid]
-  (-> card
-<<<<<<< HEAD
-      (assoc :cid cid :implementation (card-implemented card))
-      (dissoc :setname :text :_id :influence :number :influencelimit :factioncost)
-      (map->Card))))
-=======
-      (assoc :cid cid
-             :implementation (card-implemented card)
-             :subroutines (subroutines-init (assoc card :cid cid) (card-def card)))
-      (dissoc :setname :text :_id :influence :number :influencelimit :factioncost))))
->>>>>>> Refactor sub initialization and firing
+   (-> card
+       (assoc :cid cid
+              :implementation (card-implemented card)
+              :subroutines (subroutines-init (assoc card :cid cid) (card-def card)))
+       (dissoc :setname :text :_id :influence :number :influencelimit :factioncost)
+       (map->Card))))
 
 (defn build-card
   [card]
