@@ -235,19 +235,24 @@
               (when (agenda? card)
                 (trigger-event state side :agenda-counter-spent card)))
             ;; Print the message
-            (print-msg state side ability card targets cost-str)
+            (print-msg state side ability card targets cost-str (cond
+                                                                  counter-cost counter-cost
+                                                                  advance-counter-cost [:advancement advance-counter-cost]
+                                                                  :else nil))
             ;; Trigger the effect
             (register-once state ability card)
             (do-effect state side ability c targets)))))))
 
 (defn- print-msg
   "Prints the ability message"
-  [state side {:keys [eid] :as ability} card targets cost-str]
+  [state side {:keys [eid] :as ability} card targets cost-str counter-cost]
   (when-let [message (:msg ability)]
-    (when-let [desc (if (string? message) message (message state side eid card targets))]
+    (let [desc (if (string? message) message (message state side eid card targets))
+          counter-cost-str (when-let [[counter-type counter-amount] counter-cost]
+                             (str "spends " (quantify counter-amount (str "hosted " (name counter-type) " counter"))))
+          cost-spend-msg (build-spend-msg (or counter-cost-str cost-str) "use")]
       (system-msg state (to-keyword (:side card))
-                  (str (build-spend-msg cost-str "use")
-                       (:title card) (when desc (str " to " desc)))))))
+                  (str cost-spend-msg (:title card) (str " to " desc))))))
 
 (defn- do-effect
   "Trigger the effect"
