@@ -149,7 +149,7 @@
   "Converts a cost (amount attribute pair) to a string for printing"
   [[cost-type amount]]
   (when (and (number? amount)
-             (pos? amount))
+             (not (neg? amount)))
     (case cost-type
       :credit (str "pay " amount " [Credits]")
       :click (str "spend " (->> "[Click]" repeat (take amount) (apply str)))
@@ -172,7 +172,7 @@
   (let [cost-string
         (->> costs
              merge-costs
-             (map #(cost-names %))
+             (map cost-names)
              (filter some?)
              (interpose " and ")
              (apply str))]
