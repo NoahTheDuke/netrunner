@@ -13,6 +13,8 @@
    [game.core.eid :as eid]
    [game.core.events :refer [turn-events]]
    [game.core.ice :refer [active-ice?]]
+   [game.core.initializing :refer [make-card]]
+   [game.core.say :refer [build-msg]]
    [game.core.threat :refer [threat-level]]
    [game.main :as main]
    [game.test-framework.asserts]
@@ -1096,16 +1098,6 @@
   [state base]
   (handle-message-and-send-diffs! {:state state} :corp {} (str "/trace " base)))
 
-(defn log-str [state]
-  (->> (:log @state)
-       (keep :public)
-       (map :text)
-       (str/join " ")))
-
-#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
-(defn print-logs [state]
-  (prn (log-str state)))
-
 (defmacro do-game [s & body]
   `(let [~'state ~s
          ~'get-corp (fn [] (:corp @~'state))
@@ -1150,6 +1142,9 @@
   (let [bundles (for [block testing-blocks] `(let [~@let-bindings] ~block))]
     `(do ~@bundles)))
 
+(defn get-msg-text [m]
+  (if (string? m) m (or (:raw-text m) (build-msg m))))
+
 (defn escape-log-string [s]
   (str/escape s {\[ "\\[" \] "\\]"}))
 
@@ -1160,14 +1155,14 @@
 (defn last-log-contains?
   ([state content] (last-log-contains? state content :public))
   ([state content side]
-   (->> (->> @state :log (side-log side) last :text)
+   (->> (->> @state :log (side-log side) last :text get-msg-text)
         (re-find (re-pattern (escape-log-string content)))
         some?)))
 
 (defn second-last-log-contains?
   ([state content] (second-last-log-contains? state content :public))
   ([state content side]
-   (->> (->> @state :log (side-log side) butlast last :text)
+   (->> (->> @state :log (side-log side) butlast last :text get-msg-text)
         (re-find (re-pattern (escape-log-string content)))
         some?)))
 
@@ -1175,11 +1170,21 @@
   ([state n content]
    (last-n-log-contains? state n content :public))
   ([state n content side]
-   (let [log (->> @state :log (side-log side) (mapv :text))
+   (let [log (->> @state :log (side-log side) (mapv (comp get-msg-text :text)))
          index (- (count log) 1 n)
          log-entry (nth log index "")
          res (re-find (re-pattern (escape-log-string content)) log-entry)]
      (some? res))))
+
+(defn log-str [state]
+  (->> (:log @state)
+       (keep :public)
+       (map (comp get-msg-text :text))
+       (str/join " ")))
+
+#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
+(defn print-log [state]
+  (prn (log-str state)))
 
 (defn- make-zone
   [zone replacement]

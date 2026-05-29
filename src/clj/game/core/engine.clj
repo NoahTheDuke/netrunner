@@ -306,12 +306,12 @@
   (when-let [message (:msg ability)]
     (let [desc (if (or (= :cost message) (string? message))
                  message
-                 (message state side eid card targets))
-          cost-spend-msg (build-spend-msg payment-str "use")]
+                 (message state side eid card targets))]
       (cond
         (map? desc) desc
         (= :cost desc) (str payment-str " to satisfy " (get-title card))
-        desc (str cost-spend-msg (get-title card) " to " desc)))))
+        desc (str (build-spend-msg payment-str "use")
+                  (get-title card) " to " desc)))))
 
 (defn print-msg
   "Prints the ability message"
