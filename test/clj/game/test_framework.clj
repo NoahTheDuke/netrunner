@@ -1184,7 +1184,8 @@
 
 #_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
 (defn print-log [state]
-  (prn (log-str state)))
+  (prn (log-str state))
+  (newline))
 
 (defn- make-zone
   [zone replacement]
