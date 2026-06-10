@@ -1100,50 +1100,6 @@
   [state base]
   (handle-message-and-send-diffs! {:state state} :corp {} (str "/trace " base)))
 
-(defmacro do-game [s & body]
-  `(let [~'state ~s
-         ~'get-corp (fn [] (:corp @~'state))
-         ~'get-runner (fn [] (:runner @~'state))
-         ~'get-run (fn [] (:run @~'state))
-         ~'hand-size (fn [side#] (core/hand-size ~'state side#))
-         ~'refresh (fn [card#]
-                     ;; ;; uncommenting the below two assertions causes a looot of tests to fail
-                     ;; (is ~'card "card passed to refresh should not be nil")
-                     (let [~'ret (get-card ~'state card#)]
-                       ;; (is ~'ret "(refresh card) is nil - if this is intended, use (core/get-card state card)")
-                       ~'ret))
-         ~'prompt-map (fn [side#] (-> @~'state side# :prompt first))
-         ~'prompt-type (fn [side#] (:prompt-type (~'prompt-map side#)))
-         ~'prompt-buttons (fn [side#] (->> (~'prompt-map side#) :choices (map :value)))
-         ~'prompt-titles (fn [side#] (map #(or (:title %) %) (~'prompt-buttons side#)))
-         ~'prompt-fmt (fn [side#]
-                        (let [prompt# (~'prompt-map side#)
-                              choices# (:choices prompt#)
-                              choices# (cond
-                                         (nil? choices#) nil
-                                         (sequential? choices#) choices#
-                                         :else [choices#])
-                              card# (:card prompt#)
-                              prompt-type# (:prompt-type prompt#)]
-                          (str (utils/side-str side#) ": " (:msg prompt# "") "\n"
-                               (when prompt-type# (str "Type: " prompt-type# "\n"))
-                               (when card# (str "Card: " (:title card#) "\n"))
-                               (str/join "\n" (map #(str "[ " (or (get-in % [:value :title])
-                                                                  (:value %)
-                                                                  %
-                                                                  "nil") " ]") choices#))
-                               "\n")))
-         ~'print-prompts (fn []
-                           (print (~'prompt-fmt :corp))
-                           (println (~'prompt-fmt :runner)))]
-     ~@body))
-
-(defmacro before-each
-  [let-bindings & testing-blocks]
-  (assert (every? #(= 'testing (first %)) testing-blocks))
-  (let [bundles (for [block testing-blocks] `(let [~@let-bindings] ~block))]
-    `(do ~@bundles)))
-
 (defn get-msg-text
   [m]
   (if (string? m) m (or (:raw-text m) (build-msg m))))
@@ -1180,10 +1136,55 @@
        (map (comp get-msg-text :text))
        (str/join " ")))
 
-#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
-(defn print-log [state]
+(defn print-logs [state]
   (prn (log-str state))
   (newline))
+
+(defmacro do-game [s & body]
+  `(let [~'state ~s
+         ~'get-corp (fn [] (:corp @~'state))
+         ~'get-runner (fn [] (:runner @~'state))
+         ~'get-run (fn [] (:run @~'state))
+         ~'hand-size (fn [side#] (core/hand-size ~'state side#))
+         ~'refresh (fn [card#]
+                     ;; ;; uncommenting the below two assertions causes a looot of tests to fail
+                     ;; (is ~'card "card passed to refresh should not be nil")
+                     (let [~'ret (get-card ~'state card#)]
+                       ;; (is ~'ret "(refresh card) is nil - if this is intended, use (core/get-card state card)")
+                       ~'ret))
+         ~'prompt-map (fn [side#] (-> @~'state side# :prompt first))
+         ~'prompt-type (fn [side#] (:prompt-type (~'prompt-map side#)))
+         ~'prompt-buttons (fn [side#] (->> (~'prompt-map side#) :choices (map :value)))
+         ~'prompt-titles (fn [side#] (map #(or (:title %) %) (~'prompt-buttons side#)))
+         ~'prompt-fmt (fn [side#]
+                        (let [prompt# (~'prompt-map side#)
+                              choices# (:choices prompt#)
+                              choices# (cond
+                                         (nil? choices#) nil
+                                         (sequential? choices#) choices#
+                                         :else [choices#])
+                              card# (:card prompt#)
+                              prompt-type# (:prompt-type prompt#)]
+                          (str (utils/side-str side#) ": " (:msg prompt# "") "\n"
+                               (when prompt-type# (str "Type: " prompt-type# "\n"))
+                               (when card# (str "Card: " (:title card#) "\n"))
+                               (str/join "\n" (map #(str "[ " (or (get-in % [:value :title])
+                                                                  (:value %)
+                                                                  %
+                                                                  "nil") " ]") choices#))
+                               "\n")))
+         ~'print-prompts (fn []
+                           (print (~'prompt-fmt :corp))
+                           (println (~'prompt-fmt :runner)))]
+     (let [ret# (do ~@body)]
+       (log-str ~'state)
+       ret#)))
+
+(defmacro before-each
+  [let-bindings & testing-blocks]
+  (assert (every? #(= 'testing (first %)) testing-blocks))
+  (let [bundles (for [block testing-blocks] `(let [~@let-bindings] ~block))]
+    `(do ~@bundles)))
 
 (defn- make-zone
   [zone replacement]

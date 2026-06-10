@@ -22,14 +22,19 @@
      ;; List of supported language files (based on resources/public/i18n directory)
      (let [languages ["en" "es" "ca" "fr" "it" "ja" "ko" "la-pig" "pl" "pt" "ru" "zh-simp" "zh-trad"]
            errors (volatile! [])
-           ;; Try loading each language directly as a resource (works in both jar and filesystem)
+            ;; Try loading each language directly as a resource (works in both jar and filesystem)
            langs (->> languages
                       (keep (fn [lang]
-                              (try (let [res-path (str dir "/" lang ".ftl")
+                              (try (let [ui-res-path (str dir "/" lang ".ftl")
+                                         msg-res-path (str dir "/messages/" lang ".ftl")
                                          ;; Try to load from classpath (including jar)
-                                         res (io/resource res-path)]
+                                         ui-res (io/resource ui-res-path)
+                                         msg-res (io/resource msg-res-path)
+                                         ui-content (-> ui-res slurp not-empty)
+                                         msg-content (-> msg-res slurp not-empty)
+                                         content (str ui-content "\n" msg-content)]
                                      ;; Skip empty placeholder files
-                                     (when-let [content (-> res slurp not-empty)]
+                                     (when-not (str/blank? content)
                                        [lang content]))
                                    (catch Throwable _
                                      (println "Error reading lang " lang "in resource" (str dir "/" lang ".ftl"))
