@@ -200,6 +200,7 @@ move-unseen-into-hq = move {$unseen-cnt ->
 expose-card = expose {$title}
 reveal-n-cards-in-hq = reveal {$count} cards from {-hq}
 reveal-cards-in-hq = reveal {$count} cards ({$titles}) from {-hq}
+reveal-top-of-stack = reveal {$title} from the top of {-stack}
 
 disable-corp-id = disable {-corp(case:"nominative")} identity
 disable-runner-id = disable {-runner(case:"nominative")} identity
@@ -233,7 +234,8 @@ place-virus-counters = place {$count ->
     *[other] {$count} virus counters on {$title}
 }
 
-place-credits-on-self-for-trash-costs = place {$count} [Credits] for paying trash costs
+place-credits-on-self = place {$credits} {-credit} on itself
+place-credits-on-self-for-trash-costs = place {$credits} {-credit} for paying trash costs
 
 look-at-top-cards-add-to-grip = look at the top {$top-count ->
     [one] card of the stack and add {$add-count} of them to the grip

@@ -12,15 +12,14 @@
    [game.core.diffs :refer [icon-summary]]
    [game.core.eid :as eid]
    [game.core.events :refer [turn-events]]
-   [jinteki.i18n :refer [build-msg load-dictionary!]]
    [game.core.ice :refer [active-ice?]]
-   [game.core.initializing :refer [make-card]]
    [game.core.threat :refer [threat-level]]
    [game.main :as main]
    [game.test-framework.asserts]
    [game.utils :as utils]
    [game.utils-test :refer [error-wrapper is']]
    [jinteki.cards :refer [all-cards]]
+   [jinteki.i18n :refer [build-msg load-dictionary!]]
    [jinteki.utils :as jutils]
    [web.game :refer [handle-message-and-send-diffs! update-and-send-diffs!]])
   (:import
@@ -681,10 +680,10 @@
     (ensure-no-prompts state)
     (is' (some? card) (str title "is in hand"))
     (if-not (some? card)
-      (do (let [other-side (if (= side :runner) :corp :runner)]
-            (when (some? (find-card title (get-in @state [other-side :hand])))
-              (println title " was instead found in the opposing hand - was the wrong side used?")))
-          true)
+      (let [other-side (if (= side :runner) :corp :runner)]
+        (when (some? (find-card title (get-in @state [other-side :hand])))
+          (println title " was instead found in the opposing hand - was the wrong side used?"))
+        true)
       (when (do-action "play" state side {:card card})
         (let [choice-sets (split-on-keywords choices)]
           (doseq [cs choice-sets]
