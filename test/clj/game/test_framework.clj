@@ -12,7 +12,7 @@
    [game.core.diffs :refer [icon-summary]]
    [game.core.eid :as eid]
    [game.core.events :refer [turn-events]]
-   [game.core.l10n :refer [build-msg]]
+   [jinteki.i18n :refer [build-msg load-dictionary!]]
    [game.core.ice :refer [active-ice?]]
    [game.core.initializing :refer [make-card]]
    [game.core.threat :refer [threat-level]]
@@ -85,6 +85,8 @@
   (update-and-send-diffs! main/handle-action {:state state} side command args))
 
 ;; generic test helpers
+
+(load-dictionary! "public/i18n")
 
 (defn is-zone-impl
   "Is the zone exactly equal to a given set of cards?"

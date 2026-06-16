@@ -14,7 +14,6 @@
    [game.core.flags :refer [can-host? can-rez?]]
    [game.core.ice :refer [update-ice-strength]]
    [game.core.initializing :refer [card-init deactivate]]
-   [game.core.l10n :refer [->use-card-msg]]
    [game.core.moving :refer [trash-cards]]
    [game.core.payment :refer [->c build-spend-msg can-pay? merge-costs]]
    [game.core.revealing :refer [set-last-played-or-rezzed]]
