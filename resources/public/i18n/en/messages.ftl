@@ -5,6 +5,7 @@
 -corp = {$case ->
     [genitive] Corp
     [accusative] the Corp
+    [possessive] the Corp's
     *[nominative] the Corp
 }
 
@@ -46,6 +47,8 @@
 -identity-plural = identities
 -operation = operation
 -operation-plural = operations
+-program = program
+-program-plural = programs
 -resource = resource
 -resource-plural = resources
 -upgrade = upgrade
@@ -133,6 +136,11 @@ remove-tags = remove {$count ->
     *[other] {$count} tags
 }
 
+charge-card = trash {$card-str} {$count ->
+    [one] 1 time
+    *[other] {$count} times
+}
+
 # runner shuffling
 
 shuffle-grip-into-stack = shuffle { -grip } into { -stack }
@@ -201,6 +209,12 @@ do-nothing = do nothing
 take-additional-turn = take an additional turn after this one
 
 rearrange-installed-ice = rearrange any number of ice protecting all servers
+rearrange-top-n-cards-rd = rearrange the top {$count ->
+    [one] 1 card of {-rd}
+    *[other] {$count} cards of {-rd}
+}
+
+install-program-from-stack = install a {-program} from {-stack}
 
 place-n-advancement-counters = place {$count ->
     [zero] no advancement counters on {$card-str}
@@ -232,6 +246,7 @@ reveal-copies-of-self = reveal {$count ->
     [one] 1 copy of itself
     *[other] {$count} copies of itself
 }
+reveal-top-of-stack = reveal the top card of {-stack} ({$title})
 
 force-corp-trash-top-of-rd = force the Corp to trash the top {$count ->
     [one] card of R&D
@@ -243,14 +258,17 @@ force-corp-trash-additional-top-of-rd = force the Corp to trash an additional {$
 }
 force-corp-rez = force the Corp to rez {$title}
 force-corp-trash = force the Corp to trash {$title}
-force-add-all-hq-cards-to-top-of-rd = force {-corp(case:"accusative")} to add all cards in {-hq} to the top of {-rd}
-force-trash-installed-ice = force {-corp(case: "accusative")} to trash a {-ice} protecting {$server}
-force-corp-lose-credits = force the Corp to lose {$credits} {-credit}
+force-add-all-hq-cards-to-top-of-rd = force {-corp(case: "nominative")} to add all cards in {-hq} to the top of {-rd}
+force-trash-installed-ice = force {-corp(case: "nominative")} to trash a {-ice} protecting {$server}
+force-corp-lose-credits = force {-corp(case: "nominative")} to lose {$credits} {-credit}
+force-take-bad-publicity = force {-corp(case: "nominative")} to take {$count} {-bad-publicity}
 
 each-player-draws-cards = make each player draw {$count ->
     [one] 1 card
     *[other] {$count} cards
 }
+
+reduce-corp-max-hand-size-bad-publicity = reduce {-corp(case:"possessive")} maximum hand size by 1 for each {-bad-publicity}
 
 # all installs
 
@@ -281,13 +299,20 @@ bypass-ice = bypass {$title}
 
 prevent-ice-rezzed-during-run = prevent {-ice-type} from being rezzed during the run
 prevent-corp-rez-card-during-turn = prevent {-corp(case:"nominative")} from rezzing {$card-str} for the rest of the turn
+prevent-corp-rez-non-ice-on-runner-turn = prevent {-corp(case:"nominative")} from rezzing non-ice cards during {-runner(case:"possessive")} turn
 
 increase-rez-cost-first-unrezzed-approached-ice = increase the rez cost of the first unrezzed {-ice} approached by {$credits} {-credit}
+
+redirect-run-to-hq = change the attacked server to {-hq}
+
+# Damage
 
 suffer-meat-damage = suffer {$value} meat damage
 suffer-net-damage = suffer {$value} net damage
 suffer-brain-damage = suffer {$value} core damage
 suffer-core-damage = suffer {$value} core damage
+
+prevent-damage-until-next-turn = prevent all damage until your next turn
 
 # Access
 
@@ -622,6 +647,27 @@ msg-trash-cards = {$username} trashes {$count ->
 }
 
 msg-derez-card = {$username} derezzes {$card-str}.
+
+msg-rfg-n-cards-from-stack = {$username} removes {$count ->
+    [one] the top 1 card of {-stack} from the game.
+    *[other] the top {$count} cards of {-stack} from the game.
+}
+
+msg-draw-cards = {$username} draws {$count ->
+    [one] 1 card.
+    *[other] {$count} cards.
+}
+
+msg-remove-n-cards = {$username} removes {$count ->
+    [zero] no cards from the game.
+    [one] 1 card ({$card-strs}) from the game.
+    *[other] {$count} cards ({$card-strs}) from the game.
+}
+
+msg-rfg-n-cards-from-stack = {$username} removes {$count ->
+    [one] the top 1 card of {-stack} from the game.
+    *[other] the top {$count} cards of {-stack} from the game.
+}
 
 ## Traces
 
