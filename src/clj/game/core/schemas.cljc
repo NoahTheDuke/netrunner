@@ -334,11 +334,13 @@
 (register-msg :mulligan-take $username)
 (register-msg :mulligan-keep $username)
 
+(register-msg :msg-draw-cards $username $count)
 (register-msg :msg-forfeit-agenda $username $title)
 (register-msg :msg-trash-card $username $card-str)
 (register-msg :msg-trash-cards $username $count $titles)
 
 (register-msg :msg-derez-card $username $card-str)
+(register-msg :msg-rfg-n-cards-from-stack $username $count $card-strs)
 
 (def MsgMap
   (m/schema

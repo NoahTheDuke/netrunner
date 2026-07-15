@@ -254,10 +254,10 @@
                    (doseq [c top-5]
                      (move state side c :rfg))
                    (system-msg state side
-                               (str "removes "
-                                    (enumerate-cards top-5)
-                                    " from the game and draws 5 cards"))
-                   (draw state :runner eid 5)))}})
+                               {:msg/type :msg-rfg-n-cards-from-stack
+                                :count (count top-5)
+                                :card-strs top-5})
+                   (draw state :runner eid 5 {:loud true})))}})
 
 (defcard "Bahia Bands"
   (let [all [{:label "draw 2 cards"
@@ -352,12 +352,14 @@
                         (resolve-ability
                           state side
                           {:prompt "Install a non-virus program"
-                           :choices (effect (cancellable (filter #(and (program? %)
-                                                                       (not (has-subtype? % "Virus"))
-                                                                       (runner-can-install? state side eid % {:no-toast true}))
-                                                                 (:deck runner))))
+                           :choices (effect (cancellable (filterv #(and (program? %)
+                                                                        (not (has-subtype? % "Virus"))
+                                                                        (runner-can-install? state side eid % {:no-toast true}))
+                                                                  (:deck runner))))
                            :async true
-                           :effect (effect (runner-install state side eid target {:ignore-all-cost :true :msg-keys {:display-origin true :source-card card}}))}
+                           :effect (effect (runner-install state side eid target {:ignore-all-cost :true
+                                                                                  :msg-keys {:display-origin true
+                                                                                             :source-card card}}))}
                           card nil)]
                        (continue-ability state side
                           (run-any-server-ability
@@ -2623,9 +2625,9 @@
                                               (draw state :runner eid 1))}
                                 {:async true
                                  :effect (effect
-                                           (do state side (system-msg state :runner "shuffles the stack and draws 1 card")
-                                               (shuffle! state :runner :deck)
-                                               (draw state :runner eid 1)))})
+                                          (system-msg state :runner "shuffles the stack and draws 1 card")
+                                          (shuffle! state :runner :deck)
+                                          (draw state :runner eid 1))})
                               card nil)))))}})
 
 (defcard "Lawyer Up"
@@ -2750,11 +2752,11 @@
              :req (req this-card-run)
              :effect (effect (if (:did-steal target)
                             (do (system-msg state :runner
-                                            (str "adds Mad Dash to [their] score area as an agenda worth 1 agenda point"))
+                                            "adds Mad Dash to [their] score area as an agenda worth 1 agenda point")
                                 (as-agenda state :runner (get-card state card) 1)
                                 (effect-completed state side eid))
                             (do (system-msg state :runner
-                                            (str "suffers 1 meat damage from Mad Dash"))
+                                            "suffers 1 meat damage from Mad Dash")
                                 (damage state side eid :meat 1 {:card card}))))}]})
 
 (defcard "Maintenance Access"

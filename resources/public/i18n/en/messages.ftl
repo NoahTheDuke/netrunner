@@ -638,6 +638,12 @@ mulligan-keep = {$username} keeps [their] hand.
 
 ## Moving
 
+msg-draw-cards = {$username} draws {$count ->
+    [zero] no cards.
+    [one] 1 card.
+    *[other] {$count} cards.
+}
+
 msg-forfeit-agenda = {$username} forfeits {$title}.
 
 msg-trash-card = {$username} trashes {$card-str}.
@@ -649,22 +655,6 @@ msg-trash-cards = {$username} trashes {$count ->
 }
 
 msg-derez-card = {$username} derezzes {$card-str}.
-
-msg-rfg-n-cards-from-stack = {$username} removes {$count ->
-    [one] the top 1 card of {-stack} from the game.
-    *[other] the top {$count} cards of {-stack} from the game.
-}
-
-msg-draw-cards = {$username} draws {$count ->
-    [one] 1 card.
-    *[other] {$count} cards.
-}
-
-msg-remove-n-cards = {$username} removes {$count ->
-    [zero] no cards from the game.
-    [one] 1 card ({$card-strs}) from the game.
-    *[other] {$count} cards ({$card-strs}) from the game.
-}
 
 msg-rfg-n-cards-from-stack = {$username} removes {$count ->
     [one] the top 1 card of {-stack} from the game.
