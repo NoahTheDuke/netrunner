@@ -248,7 +248,6 @@ reveal-copies-of-self = reveal {$count ->
     [one] 1 copy of itself
     *[other] {$count} copies of itself
 }
-reveal-top-of-stack = reveal the top card of {-stack} ({$title})
 
 force-corp-trash-top-of-rd = force the Corp to trash the top {$count ->
     [one] card of R&D

@@ -304,11 +304,12 @@
 (defn- get-side-message
   [state side {:keys [eid] :as ability} card targets payment-str]
   (when-let [message (:msg ability)]
-    (let [desc (if (or (= :cost message) (string? message))
+    (let [side (or (:player ability) side)
+          desc (if (or (= :cost message) (string? message))
                  message
                  (message state side eid card targets))]
       (cond
-        (map? desc) desc
+        (map? desc) (assoc desc :side side)
         (= :cost desc) (str payment-str " to satisfy " (get-title card))
         desc (str (build-spend-msg payment-str "use")
                   (get-title card) " to " desc)))))

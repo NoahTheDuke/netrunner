@@ -108,6 +108,7 @@
 (register-effect :forfeit $title)
 (register-effect :add-self-to-score-area $value)
 (register-effect :give-bad-publicity $count)
+(register-effect :force-take-bad-publicity $count)
 (register-effect :force-trash-installed-ice $server)
 
 (register-effect :add-card-to-grip $title)
@@ -140,6 +141,9 @@
 (register-effect :do-nothing)
 
 (register-effect :take-additional-turn)
+(register-effect :prevent-damage-until-next-turn)
+(register-effect :prevent-corp-rez-non-ice-on-runner-turn)
+(register-effect :reduce-corp-max-hand-size-bad-publicity)
 
 (register-effect :rearrange-installed-ice)
 (register-effect :rearrange-top-n-cards-rd $count)
@@ -147,6 +151,7 @@
 (register-effect :place-n-advancement-counters $count $card-str)
 (register-effect :remove-advancement-counters $count $card-str)
 (register-effect :place-virus-counters $count $title)
+(register-effect :charge-card $card-str $count)
 
 (register-effect :place-credits-on-self $credits)
 (register-effect :place-credits-on-self-for-trash-costs $credits)
@@ -173,6 +178,7 @@
 
 (register-effect :install-from-stack $title)
 (register-effect :install-from-stack-with-discount $title $discount)
+(register-effect :install-program-from-stack)
 
 (register-effect :rez-card $card-str)
 (register-effect :derez-card $card-str)
@@ -191,6 +197,13 @@
 (register-effect :prevent-corp-rez-card-during-turn $card-str)
 
 (register-effect :increase-rez-cost-first-unrezzed-approached-ice $credits)
+(register-effect :redirect-run-to-archives)
+(register-effect :redirect-run-to-hq)
+(register-effect :redirect-run-to-rd)
+
+(register-effect :prevent-core-damage $count)
+(register-effect :prevent-net-damage $count)
+(register-effect :prevent-meat-damage $count)
 
 (register-effect :suffer-meat-damage $value)
 (register-effect :suffer-net-damage $value)
@@ -204,7 +217,6 @@
 (register-effect :trash-all-installed-corp)
 
 (register-effect :turn-all-installed-runner-facedown)
-
 
 (register-effect :payment-click $value)
 (register-effect :payment-credit $value)
@@ -221,7 +233,6 @@
 (register-effect :payment-bad-publicity $count)
 (register-effect :payment-return-to-grip $title)
 (register-effect :payment-return-to-hq $title)
-
 (register-effect :payment-return-from-game $title)
 (register-effect :payment-rfg-program $count $titles)
 (register-effect :payment-trash-installed $count $titles)
@@ -231,7 +242,6 @@
 (register-effect :payment-trash-connection $count $titles)
 (register-effect :payment-trash-ice $count $titles)
 (register-effect :payment-trash-bioroid $count $titles)
-
 (register-effect :payment-trash-from-stack $count)
 (register-effect :payment-trash-from-rd $count)
 (register-effect :payment-trash-from-grip $count $titles)
@@ -244,29 +254,22 @@
 (register-effect :payment-random-reveal-trash-from-hq $count $titles)
 (register-effect :payment-trash-all-cards-in-hq $count)
 (register-effect :payment-trash-all-cards-in-grip $count $titles)
-
 (register-effect :payment-trash-hardware-in-grip $count $titles)
 (register-effect :payment-trash-program-in-grip $count $titles)
 (register-effect :payment-trash-resource-in-grip $count $titles)
-
 (register-effect :payment-meat $value)
 (register-effect :payment-net $value)
 (register-effect :payment-core $value)
-
 (register-effect :payment-shuffle-installed-into-stack $count $titles)
 (register-effect :payment-shuffle-installed-into-rd $count)
 (register-effect :payment-add-installed-bottom-stack $count $titles)
 (register-effect :payment-add-installed-bottom-rd $count $titles)
 (register-effect :payment-add-random-from-hand-to-bottom-of-stack $count)
 (register-effect :payment-add-random-from-hand-to-bottom-of-rd $count)
-
 (register-effect :payment-hosted-to-hq $count $titles)
-
 (register-effect :payment-any-agenda-counter $count $title)
 (register-effect :payment-any-virus-counter $count $title)
-
 (register-effect :payment-derez-harmonic $count $titles)
-
 
 (register-effect :card-str-runner-seen $title)
 (register-effect :card-str-runner-unknown)

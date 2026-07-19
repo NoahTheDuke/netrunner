@@ -55,17 +55,16 @@
    [game.core.installing :refer [install-as-condition-counter install-locked?
                                  runner-can-install?
                                  runner-can-pay-and-install? runner-install]]
-   [jinteki.i18n :refer [msg-with-cost simple-msg]]
    [game.core.link :refer [get-link]]
    [game.core.mark :refer [identify-mark-ability mark-changed-event]]
    [game.core.memory :refer [available-mu]]
    [game.core.moving :refer [as-agenda flip-facedown forfeit mill move
                              swap-ice trash trash-cards]]
-   [game.core.payment :refer [->c can-pay? cost-value x-cost-value]]
+   [game.core.payment :refer [->c can-pay? x-cost-value]]
    [game.core.play-instants :refer [play-instant]]
-   [game.core.prevention :refer [damage-name prevent-damage prevent-end-run
-                                 prevent-up-to-n-damage prevent-up-to-n-tags
-                                 preventable?]]
+   [game.core.prevention :refer [damage-name damage-type prevent-damage
+                                 prevent-end-run prevent-up-to-n-damage
+                                 prevent-up-to-n-tags preventable?]]
    [game.core.prompts :refer [cancellable clear-wait-prompt]]
    [game.core.props :refer [add-counter add-prop]]
    [game.core.revealing :refer [reveal reveal-loud]]
@@ -88,6 +87,7 @@
    [game.core.virus :refer [get-virus-counters]]
    [game.macros :refer [continue-ability effect msg req wait-for]]
    [game.utils :refer :all]
+   [jinteki.i18n :refer [msg-with-cost simple-msg]]
    [jinteki.utils :refer :all]
    [jinteki.validator :refer [legal?]]))
 
@@ -2339,7 +2339,7 @@
                          ((constantly false)
                           (toast state :corp "Cannot rez non-ice on the Runner's turn due to Interdiction"))
                          true))))]
-    {:on-play {:msg "prevent the Corp from rezzing non-ice cards on the Runner's turn"
+    {:on-play {:msg (simple-msg :prevent-corp-rez-non-ice-on-runner-turn)
                :effect ab}
      :events [{:event :runner-turn-begins
                :silent true
@@ -2349,47 +2349,58 @@
 (defcard "Into the Depths"
   ;; note - Into the Depths specifies "each time you passed an ICE". This means, unlike bravado,
   ;; passing the same ice multiple times (ie thimblerig) counts.
-  (let [all [{:msg "gain 4 [Credits]"
+  (let [all [{:label "Gain 4 [Credits]"
+              :msg (simple-msg
+                    {:effect/type :gain-credits
+                     :effect/count 4})
               :async true
               :effect (effect (gain-credits state side eid 4))}
-             {:msg "install a program from the stack"
+             {:label "install a program from the stack"
+              :msg (simple-msg :install-program-from-stack)
               :async true
               :req (req (not (install-locked? state side)))
               :effect (effect (continue-ability
-                                state side {:prompt "Choose a program to install"
-                                 :msg (msg (if (= target "Done")
-                                             "shuffle the stack"
-                                             (str "install " (:title target) " from the stack")))
-                                 :choices (effect (concat
-                                                 (->> (:deck runner)
-                                                      (filter
-                                                        #(and (program? %)
-                                                              (runner-can-pay-and-install? state side (assoc eid :source card) %)))
-                                                      (sort-by :title)
-                                                      (seq))
-                                                 ["Done"]))
+                                state side
+                                {:prompt "Choose a program to install"
+                                 :choices (effect
+                                           (concat
+                                            (->> (:deck runner)
+                                                 (filter
+                                                  #(and (program? %)
+                                                        (runner-can-pay-and-install? state side (assoc eid :source card) %)))
+                                                 (sort-by :title)
+                                                 (seq))
+                                            ["Done"]))
+                                 :msg (simple-msg
+                                       (if (= target "Done")
+                                         :shuffle-stack
+                                         {:effect/type :install-from-stack
+                                          :effect/title (:title target)}))
                                  :async true
-                                 :effect (effect (trigger-event state side :searched-stack)
-                                              (shuffle! state side :deck)
-                                              (if (= target "Done")
-                                                (effect-completed state side eid)
-                                                (runner-install state side (assoc eid :source card :source-type :runner-install) target {:msg-keys {:install-source card
-                                                                                                                                                    :display-origin true}})))}
+                                 :effect (effect
+                                          (trigger-event state side :searched-stack)
+                                          (shuffle! state side :deck)
+                                          (if (= target "Done")
+                                            (effect-completed state side eid)
+                                            (runner-install state side (assoc eid :source card :source-type :runner-install)
+                                                            target {:msg-keys {:install-source card
+                                                                               :display-origin true}})))}
                                 card nil))}
-             {:async true
-              :effect (effect (continue-ability state side (charge-ability state side) card nil))
-              :msg "charge a card"}]
+             {:label "charge a card"
+              :async true
+              :effect (effect (continue-ability state side (charge-ability state side) card nil))}]
         choice (fn choice [abis rem]
                  {:prompt (str "Choose an ability to resolve (" rem " remaining)")
                   :waiting-prompt true
-                  :choices (map #(capitalize (:msg %)) abis)
+                  :choices (mapv #(capitalize (:label %)) abis)
                   :async true
-                  :effect (effect (let [chosen (some #(when (= target (capitalize (:msg %))) %) abis)]
-                                 (wait-for
-                                   (resolve-ability state side chosen card nil)
-                                   (if (< 1 rem)
-                                     (continue-ability state side (choice (remove-once #(= % chosen) abis) (dec rem)) card nil)
-                                     (effect-completed state side eid)))))})]
+                  :effect (effect
+                           (let [chosen (some #(when (= target (capitalize (:label %))) %) abis)]
+                             (wait-for
+                               (resolve-ability state side chosen card nil)
+                               (if (< 1 rem)
+                                 (continue-ability state side (choice (remove-once #(= % chosen) abis) (dec rem)) card nil)
+                                 (effect-completed state side eid)))))})]
     {:makes-run true
      :on-play (run-any-server-ability)
      :events [{:event :successful-run
@@ -2406,12 +2417,14 @@
 (defcard "Isolation"
   {:on-play
    {:additional-cost [(->c :resource 1)]
-    :msg "gain 7 [Credits]"
+    :msg (simple-msg
+          {:effect/type :gain-credits
+           :effect/count 7})
     :async true
     :effect (effect (gain-credits state side eid 7))}})
 
 (defcard "Itinerant Protesters"
-  {:on-play {:msg "reduce the Corp's maximum hand size by 1 for each bad publicity"}
+  {:on-play {:msg (simple-msg :reduce-corp-max-hand-size-bad-publicity)}
    :static-abilities [(corp-hand-size+ (effect (- (count-bad-pub state))))]})
 
 (defcard "Jailbreak"
@@ -2421,7 +2434,9 @@
              :automatic :draw-cards
              :silent true
              :async true
-             :msg "draw 1 card"
+             :msg (simple-msg
+                   {:effect/type :draw-cards
+                    :effect/count 1})
              :req (req (#{:hq :rd} (target-server context))
                             this-card-run)
              :effect (effect (register-events
@@ -2438,7 +2453,9 @@
              :async true
              :req (req (= :rd (target-server context))
                             this-card-run)
-             :msg "draw 5 cards"
+             :msg (simple-msg
+                   {:effect/type :draw-cards
+                    :effect/count 5})
              :effect (effect (draw state side eid 5))}]})
 
 (defcard "Katorga Breakout"
@@ -2451,7 +2468,9 @@
              :prompt "Choose 1 card to add to the grip"
              :waiting-prompt true
              :choices (effect (cancellable (:discard runner) :sorted))
-             :msg (msg "add " (:title target) " to the grip")
+             :msg (simple-msg
+                   {:effect/type :add-card-to-grip
+                    :effect/title (:title target)})
              :effect (effect (move state side target :hand))}]})
 
 (defcard "Khusyuk"
@@ -2689,10 +2708,12 @@
      :prompt "Take 2 bad publicity?"
      :waiting-prompt true
      :yes-ability {:player :corp
-                   :msg "take 2 bad publicity"
+                   :msg (simple-msg
+                         {:effect/type :force-take-bad-publicity
+                          :effect/count 2})
                    :effect (effect (gain-bad-publicity state :corp 2))}
      :no-ability {:player :runner
-                  :msg "is immune to damage until the beginning of the Runner's next turn"
+                  :msg (simple-msg :prevent-damage-until-next-turn)
                   :effect (effect
                             (register-lingering-effect
                               state side card
@@ -2708,7 +2729,13 @@
                                                  :card card
                                                  :condition :floating
                                                  :req (req (preventable? context))
-                                                 :msg (msg "prevent " (:remaining context) " " (damage-name state) " damage")
+                                                 :msg (simple-msg
+                                                       (let [t (case (damage-type state)
+                                                                 :meat :prevent-meat-damage
+                                                                 (:brain :core) :prevent-core-damage
+                                                                 :net :prevent-net-damage)]
+                                                         {:effect/type t
+                                                          :effect/count (:remaining context)}))
                                                  :effect (effect (prevent-damage state side eid :all))}}}))}}}})
 
 (defcard "Levy AR Lab Access"
@@ -2726,21 +2753,27 @@
   (letfn [(remove-tag-opt [x]
             {:option (str "Remove " (quantify x "tag"))
              :req (req (>= (count-tags state) x))
-             :ability {:msg (str "remove " (quantify x "tag"))
+             :ability {:msg (simple-msg
+                             {:effect/type :remove-tags
+                              :effect/count x})
                        :async true
                        :effect (effect (lose-tags state side eid x))}})]
     {:on-play (choose-one-helper
-                {:change-in-game-state {:req (req (or (seq (:deck runner)) tagged))}}
-		[{:option "Draw 4 cards"
-                  :ability {:msg "draw 4 cards"
-                            :async true
-                            :effect (effect (draw state side eid 4))}}
-                 {:option "Remove up to 2 tags"
-                  :ability (choose-one-helper (vec (map remove-tag-opt [0 1 2])))}])}))
+               {:change-in-game-state {:req (req (or (seq (:deck runner)) tagged))}}
+               [{:option "Draw 4 cards"
+                 :ability {:msg (simple-msg
+                                 {:effect/type :draw-cards
+                                  :effect/count 4})
+                           :async true
+                           :effect (effect (draw state side eid 4))}}
+                {:option "Remove up to 2 tags"
+                 :ability (choose-one-helper (mapv remove-tag-opt [0 1 2]))}])}))
 
 (defcard "Lucky Find"
   {:on-play
-   {:msg "gain 9 [Credits]"
+   {:msg (simple-msg
+          {:effect/type :gain-credits
+           :effect/count 9})
     :async true
     :effect (effect (gain-credits state side eid 9))}})
 
@@ -2764,7 +2797,7 @@
    :events [{:event :pre-approach-server
              :unregister-once-resolved true
              :interactive (effect true)
-             :msg "change the attacked server to HQ"
+             :msg (simple-msg :redirect-run-to-hq)
              :req (req (= :archives (-> run :server first)))
              :effect (effect (swap! state assoc-in [:run :server] [:hq]))}]
    :on-play (run-server-ability :archives)})

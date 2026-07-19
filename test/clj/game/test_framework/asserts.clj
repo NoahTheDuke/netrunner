@@ -2,7 +2,6 @@
   (:require
    [clojure.test :as t]
    [kaocha.hierarchy :as k.hierarchy]
-   [kaocha.output :as k.output]
    [kaocha.report :as k.report]))
 
 (defmethod t/assert-expr 'last-log-contains?

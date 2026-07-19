@@ -1671,7 +1671,7 @@
       (take-credits state :corp)
       (play-from-hand state :runner "Concerto")
       (let [concerto (-> (get-runner) :play-area first)]
-        (is (last-log-contains? state "reveal Sure Gamble"))
+        (is (last-log-contains? state #"reveal.*Sure Gamble"))
         (is (find-card "Sure Gamble" (:hand (get-runner))))
         (is (= 5 (get-counters (refresh concerto) :credit))))
       (click-prompt state :runner "HQ")
