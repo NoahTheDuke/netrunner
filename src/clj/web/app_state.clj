@@ -3,7 +3,6 @@
    [cljc.java-time.instant :as inst]
    [cljc.java-time.temporal.chrono-unit :as chrono]
    [clojure.core.async :refer [<! go timeout]]
-   [differ.core :as differ]
    [medley.core :refer [dissoc-in find-first]]
    [taoensso.encore :as enc])
   (:import
@@ -12,12 +11,15 @@
 
 (set! *warn-on-reflection* true)
 
+(def base-app-state
+  {:lobbies {}
+   :lobby-updates {}
+   :tournament nil
+   :block-game-creation false
+   :users {}})
+
 (defonce app-state
-  (atom {:lobbies {}
-         :lobby-updates {}
-         :tournament nil
-         :block-game-creation false
-         :users {}}))
+  (atom base-app-state))
 
 (defonce last-updates (ConcurrentHashMap/new))
 
