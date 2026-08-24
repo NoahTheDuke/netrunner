@@ -52,4 +52,6 @@
                     :mongo #ig/ref :mongodb/connection}
  :sente/router {:ws #ig/ref :web/ws}
  :game/quotes nil
+ :jinteki/cards-version {:initial "1"
+                         :mongo #ig/ref :mongodb/connection}
  :jinteki/cards {:mongo #ig/ref :mongodb/connection}}

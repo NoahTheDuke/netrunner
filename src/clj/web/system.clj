@@ -32,10 +32,11 @@
    [web.logs :refer [timbre-init!]]
    [web.telemetry]
    [web.utils :refer [tick]]
-   [web.versions :refer [banned-msg frontend-version]]
+   [web.versions :refer [banned-msg cards-version frontend-version]]
    [web.ws :as ws]) 
   (:import
-   [clojure.lang ExceptionInfo]))
+   [clojure.lang ExceptionInfo]
+   [org.httpkit.server HttpServer]))
 
 (read-write/print-time-literals-clj!)
 
@@ -76,10 +77,12 @@
   (reset! app-state/app-state app-state/base-app-state))
 
 (defmethod ig/init-key :web/server [_ {:keys [app port]}]
-  (run-server app {:port port
-                   :legacy-return-value? false}))
+  (let [^HttpServer s (run-server app {:port port
+                                       :legacy-return-value? false})]
+    {:server s
+     :port (.getPort s)}))
 
-(defmethod ig/halt-key! :web/server [_ server]
+(defmethod ig/halt-key! :web/server [_ {server :server}]
   (when server
     (server-stop! server nil)))
 
@@ -101,23 +104,16 @@
 
 (defmethod ig/init-key :web/banned-msg [_ {initial :initial
                                            {:keys [db]} :mongo}]
-  (if-let [config (mc/find-one-as-map db "config" nil)]
-    (do (reset! banned-msg (:banned-msg config))
-        config)
-    (do (doto db
-          (mc/create "config" nil)
-          (mc/insert-and-return "config" {:banned-msg initial}))
+  (if-let [msg (:banned-msg (mc/find-one-as-map db "config" nil))]
+    (reset! banned-msg msg)
+    (do (mc/insert-and-return db "config" {:banned-msg initial})
         (reset! banned-msg initial))))
 
 (defmethod ig/init-key :frontend/version [_ {initial :initial
                                              {:keys [db]} :mongo}]
-  (if-let [config (mc/find-one-as-map db "config" nil)]
-    (do (reset! frontend-version (:version config))
-        config)
-    (do (doto db
-          (mc/create "config" nil)
-          (mc/insert-and-return "config" {:version initial
-                                          :cards-version 0}))
+  (if-let [version (:version (mc/find-one-as-map db "config" nil))]
+    (reset! frontend-version version)
+    (do (mc/insert-and-return db "config" {:version initial})
         (reset! frontend-version initial))))
 
 (defmethod ig/init-key :web/ws [_ opts]
@@ -154,6 +150,13 @@
                  (assoc! m (name k) v))
                (transient {}))
               (persistent!))))
+
+(defmethod ig/init-key :jinteki/cards-version [_ {initial :initial
+                                                  {:keys [db]} :mongo}]
+  (if-let [version (:cards-version (mc/find-one-as-map db "config" nil))]
+    (reset! cards-version version)
+    (do (mc/insert-and-return db "config" {:cards-version initial})
+        (reset! cards-version initial))))
 
 (defmethod ig/init-key :jinteki/cards [_ {{:keys [db]} :mongo}]
   (let [cards (mc/find-maps db "cards" nil)
