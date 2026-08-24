@@ -177,6 +177,7 @@
                (-> request
                    (assoc :system/db (-> system :mongodb/connection :db))
                    (assoc :system/server-mode (:server-mode system))
+                   (assoc :system/redis (:redis/connection system))
                    (assoc :system/auth (:web/auth system))
                    (assoc :system/chat (:web/chat system))
                    (assoc :system/email (:web/email system))

@@ -1,15 +1,17 @@
 (ns web.admin
   (:require
    [cljc.java-time.instant :as inst]
+   [clojure.string :as str]
    [jinteki.utils :refer [superuser?]]
    [monger.collection :as mc]
    [monger.operators :refer :all]
    [monger.result :refer [acknowledged? updated-existing?]]
+   [taoensso.carmine :refer [wcar]]
+   [taoensso.carmine :as car]
    [web.app-state :as app-state]
    [web.mongodb :refer [->object-id]]
    [web.user :refer [active-user?]]
    [web.utils :refer [response]]
-   [web.versions :refer [frontend-version banned-msg]]
    [web.ws :as ws]))
 
 (defn- last-ip-address
@@ -59,28 +61,29 @@
         version (:version config "0.0")]
     (response 200 {:message "ok" :version version})))
 
-(defn version-update-handler [{db :system/db
+(defn version-update-handler [{:system/keys [db redis]
                                {version :version} :body}]
   (if-not (empty? version)
     (do
-      (reset! frontend-version version)
+      (wcar redis (car/set :frontend/version version))
       (mc/update db "config" {} {$set {:version version}})
       (response 200 {:message "ok" :version version}))
     (response 400 {:message "Missing version item"})))
 
-(defn banned-message-handler [{db :system/db}]
-  (let [config (mc/find-one-as-map db "config" nil)
-        banned (:banned-msg config "Account is locked")]
-    (response 200 {:message "ok" :banned banned})))
+(defn banned-message-handler [{:system/keys [db redis]}]
+  (let [msg (or (wcar redis (car/get :config/banned-msg))
+              (:banned-msg (mc/find-one-as-map db "config" nil))
+              "Account is locked")]
+    (response 200 {:message "ok" :banned msg})))
 
-(defn banned-message-update-handler [{db :system/db
+(defn banned-message-update-handler [{:system/keys [db redis]
                                       {banned :banned} :body}]
-  (if-not (empty? banned)
+  (if (str/blank? banned)
+    (response 400 {:message "Missing banned message item"})
     (do
-      (reset! banned-msg banned)
+      (wcar redis (car/set :config/banned-msg banned))
       (mc/update db "config" {} {$set {:banned-msg banned}})
-      (response 200 {:message "ok" :banned banned}))
-    (response 400 {:message "Missing banned message item"})))
+      (response 200 {:message "ok" :banned banned}))))
 
 (def user-collection "users")
 
