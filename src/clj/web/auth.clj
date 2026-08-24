@@ -13,12 +13,12 @@
    [monger.result :refer [acknowledged?]]
    [postal.core :as mail]
    [ring.util.response :refer [redirect]]
+   [taoensso.carmine :refer [wcar]]
    [web.analytics :refer [update-analytics]]
    [web.app-state :as app-state]
    [web.mongodb :refer [->object-id find-one-as-map-case-insensitive]]
    [web.user :refer [active-user? create-user user-keys valid-username?]]
-   [web.utils :refer [md5 response]]
-   [web.versions :refer [banned-msg]])
+   [web.utils :refer [md5 response]])
   (:import
    java.security.SecureRandom))
 
@@ -101,7 +101,7 @@
   (active-user? (find-one-as-map-case-insensitive db "users" query)))
 
 (defn login-handler
-  [{db :system/db
+  [{:system/keys [db redis]
     auth :system/auth
     {:keys [username password]} :params
     remote-address :remote-addr
@@ -112,13 +112,13 @@
   (let [client-ip (or (some-> headers (get "x-forwarded-for") (str/split #",") first)
                       (some-> headers (get "x-real-ip"))
                       remote-address)
-        user (mc/find-one-as-map db "users" {:username username})]
+        user (mc/find-one-as-map db "users" {:username username})
+        password? (when user (password/check password (:password user)))]
     (cond
-      (and user (password/check password (:password user)) (:banned user))
-      (response 403 {:error (or @banned-msg "Account Locked")})
-      (and user (password/check password (:password user)) (mc/find-one-as-map db "ip-bans" {:ip-address client-ip}))
-      (response 403 {:error (or @banned-msg "Account Locked")})
-      (and user (password/check password (:password user)))
+      (and user password? (or (:banned user)
+                            (mc/find-one-as-map db "ip-bans" {:ip-address client-ip})))
+      (response 403 {:error (wcar redis :config/banned-msg)})
+      (and user password?)
       (do (mc/update db "users"
                      {:username username}
                      {"$set" {:last-connection (inst/now)

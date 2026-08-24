@@ -17,6 +17,7 @@
    [game.quotes :refer [load-quotes!]]
    [integrant.core :as ig]
    [jinteki.cards :as cards]
+   [taoensso.carmine :as car :refer [wcar]]
    [jinteki.i18n :as i18n]
    [medley.core :refer [deep-merge]]
    [monger.collection :as mc]
@@ -32,7 +33,6 @@
    [web.logs :refer [timbre-init!]]
    [web.telemetry]
    [web.utils :refer [tick]]
-   [web.versions :refer [banned-msg cards-version frontend-version]]
    [web.ws :as ws]) 
   (:import
    [clojure.lang ExceptionInfo]
@@ -61,6 +61,13 @@
 
 (defmethod ig/halt-key! :mongodb/connection [_ {:keys [conn]}]
   (mg/disconnect conn))
+
+(defmethod ig/init-key :redis/connection [_ {:keys [pool spec]}]
+  {:pool (car/connection-pool pool)
+   :spec spec})
+
+(defmethod ig/halt-key! :redis/connection [_ {:keys [pool]}]
+  (taoensso.carmine.connections.ConnectionPool/.close pool))
 
 (defmethod ig/init-key :logging/timbre [_ config]
   (timbre-init! config))
@@ -102,19 +109,23 @@
 (defmethod ig/init-key :web/email [_ settings]
   settings)
 
-(defmethod ig/init-key :web/banned-msg [_ {initial :initial
+(defmethod ig/init-key :web/banned-msg [_ {:keys [initial redis]
                                            {:keys [db]} :mongo}]
   (if-let [msg (:banned-msg (mc/find-one-as-map db "config" nil))]
-    (reset! banned-msg msg)
+    (do (wcar redis (car/set :config/banned-msg msg))
+      msg)
     (do (mc/insert-and-return db "config" {:banned-msg initial})
-        (reset! banned-msg initial))))
+      (wcar redis (car/set :config/banned-msg initial))
+      initial)))
 
-(defmethod ig/init-key :frontend/version [_ {initial :initial
+(defmethod ig/init-key :frontend/version [_ {:keys [initial redis]
                                              {:keys [db]} :mongo}]
   (if-let [version (:version (mc/find-one-as-map db "config" nil))]
-    (reset! frontend-version version)
+    (do (wcar redis (car/set :config/version version))
+      version)
     (do (mc/insert-and-return db "config" {:version initial})
-        (reset! frontend-version initial))))
+      (wcar redis (car/set :config/version initial))
+      initial)))
 
 (defmethod ig/init-key :web/ws [_ opts]
   (ws/start-server! opts)
@@ -151,12 +162,14 @@
                (transient {}))
               (persistent!))))
 
-(defmethod ig/init-key :jinteki/cards-version [_ {initial :initial
+(defmethod ig/init-key :jinteki/cards-version [_ {:keys [initial redis]
                                                   {:keys [db]} :mongo}]
-  (if-let [version (:cards-version (mc/find-one-as-map db "config" nil))]
-    (reset! cards-version version)
-    (do (mc/insert-and-return db "config" {:cards-version initial})
-        (reset! cards-version initial))))
+  (if-let [version (:version (mc/find-one-as-map db "config" nil))]
+    (do (wcar redis (car/set :config/cards-version version))
+      version)
+    (do (mc/insert-and-return db "config" {:version initial})
+      (wcar redis (car/set :config/cards-version initial))
+      initial)))
 
 (defmethod ig/init-key :jinteki/cards [_ {{:keys [db]} :mongo}]
   (let [cards (mc/find-maps db "cards" nil)
@@ -205,6 +218,10 @@
            (stop (:system (ex-data ex)))))))
 
 (comment
-  (def system (start))
+  (def system (start {:only [:redis/connection]}))
+  (wcar system
+    (car/set :hello/world 1)
+    (car/get :hello/world)
+    )
   (stop system)
   )
