@@ -176,16 +176,18 @@
                          :keys [server-mode]
                          redis :redis/connection
                          {db :db} :mongodb/connection}]
-             (fn [request]
-               (-> request
-                   (assoc :system/auth auth)
-                   (assoc :system/chat chat)
-                   (assoc :system/db db)
-                   (assoc :system/email email)
-                   (assoc :system/redis redis)
-                   (assoc :system/server-mode server-mode)
-                   (assoc :system/ws ws)
-                   (handler))))}))
+             (let [system {:system/auth auth
+                           :system/chat chat
+                           :system/db db
+                           :system/email email
+                           :system/redis redis
+                           :system/server-mode server-mode
+                           :system/ws ws}]
+               (fn [request]
+                 (-> request
+                     (assoc :system/whole system)
+                     (merge system)
+                     (handler)))))}))
 
 (defn make-middleware [system]
   {:middleware [wrap-return-favicon

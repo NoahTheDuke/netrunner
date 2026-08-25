@@ -82,7 +82,7 @@
         task-chan))))
 
 (defn- alert-lobby
-  [ws {:keys [gameid] :as lobby} s]
+  [{:system/keys [redis ws]} {:keys [gameid] :as lobby} s]
   (when-let [actual-lobby (app-state/get-lobby gameid)]
     (if (:excluded? actual-lobby)
       (cancel-tasks-for-lobby! actual-lobby)
@@ -98,7 +98,7 @@
                                      update :lobbies lobby/handle-send-message gameid message)
                 lobby? (get-in new-app-state [:lobbies gameid])]
             (when lobby?
-              (app-state/set-last-update gameid))
+              (app-state/set-last-update redis gameid))
             (lobby/send-lobby-state ws lobby?)
             (lobby/log-delay! timestamp :tournament-alert-lobby)))))))
 
@@ -107,35 +107,34 @@
   (inst/plus (inst/plus time (duration/of-minutes (or minutes 0))) (duration/of-seconds (or seconds 0))))
 
 (defn- schedule-lobby!
-  [ws {:keys [gameid time-extension] :as lobby}]
+  [system {:keys [gameid time-extension] :as lobby}]
   (when-let [{:keys [round-start round-start-alert round-start-1m-alert
                      round-20m-warning round-5m-warning round-1m-warning round-end
                      round-time-call round-time-explainer report-match]
               :as round} (app-state/tournament-state)]
     (when round-start-alert
       (schedule-task [gameid :round-start] round-start
-        (fn [] (alert-lobby ws lobby "The round has begun!"))))
+                     (fn [] (alert-lobby system lobby "The round has begun!"))))
     (when round-start-1m-alert (schedule-task [gameid :round-start-1m] (inst/minus round-start (duration/of-minutes 1))
-                                 (fn [] (alert-lobby ws lobby "The round will begin in one minute."))))
+                                              (fn [] (alert-lobby system lobby "The round will begin in one minute."))))
 
     (when round-end            (schedule-task [gameid :round-end]      (offset-time round-end time-extension 0)
-                                 (fn [] (alert-lobby ws lobby round-time-call))))
+                                 (fn [] (alert-lobby system lobby round-time-call))))
     (when round-time-explainer (schedule-task [gameid :round-explain]  (offset-time round-end time-extension 0)
-                                 (fn [] (alert-lobby ws lobby round-time-explainer))))
-    (when round-1m-warning     (schedule-task [gameid :round-1m-warn]  (inst/plus round-end (duration/of-minutes (- (or time-extension 0) 1))) (fn [] (alert-lobby ws lobby "1 minute remaining in the round"))))
-    (when round-5m-warning     (schedule-task [gameid :round-5m-warn]  (inst/plus round-end (duration/of-minutes (- (or time-extension 0) 5))) (fn [] (alert-lobby ws lobby "5 minutes remaining in the round"))))
-    (when round-20m-warning    (schedule-task [gameid :round-20m-warn] (inst/plus round-end (duration/of-minutes (- (or time-extension 0) 20))) (fn [] (alert-lobby ws lobby "20 minutes remaining in the round"))))
-    (when report-match         (schedule-task [gameid :report-match]   (offset-time round-end time-extension 10) (fn [] (alert-lobby ws lobby (str "Report your match here: " report-match)))))))
+                                 (fn [] (alert-lobby system lobby round-time-explainer))))
+    (when round-1m-warning     (schedule-task [gameid :round-1m-warn]  (inst/plus round-end (duration/of-minutes (- (or time-extension 0) 1))) (fn [] (alert-lobby system lobby "1 minute remaining in the round"))))
+    (when round-5m-warning     (schedule-task [gameid :round-5m-warn]  (inst/plus round-end (duration/of-minutes (- (or time-extension 0) 5))) (fn [] (alert-lobby system lobby "5 minutes remaining in the round"))))
+    (when round-20m-warning    (schedule-task [gameid :round-20m-warn] (inst/plus round-end (duration/of-minutes (- (or time-extension 0) 20))) (fn [] (alert-lobby system lobby "20 minutes remaining in the round"))))
+    (when report-match         (schedule-task [gameid :report-match]   (offset-time round-end time-extension 10) (fn [] (alert-lobby system lobby (str "Report your match here: " report-match)))))))
 
-(defmethod lobby/assign-tournament-properties :default [ws {:keys [gameid] :as lobby}]
+(defmethod lobby/assign-tournament-properties :default [system {:keys [gameid] :as lobby}]
   (when-let [lobby? (app-state/get-lobby gameid)]
     (when (and (= "competitive" (:room lobby))
                (not (:exclude? lobby)))
-      (schedule-lobby! ws lobby?))))
+      (schedule-lobby! system lobby?))))
 
 (defn- conclude-round
-  [{{:system/keys [ws]} :ring-req
-    uid :uid
+  [{uid :uid
     :as msg}]
   (swap! app-state/app-state assoc :tournament nil)
   (cancel-all-tasks!)

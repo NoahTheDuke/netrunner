@@ -134,7 +134,14 @@
            nil))))
 
 (comment
-  (def system (start))
+  (let [redis (start {:only [:redis/connection]})]
+    (prn (wcar redis
+          (car/hset :foo 1 "amazing")
+          (car/hset :foo 2 "wonderful")
+          (car/parse-map (car/hgetall :foo))
+          ))
+    (stop redis))
+  (def system (start {:only [:redis/connection]}))
   (wcar (:redis/connection system)
     (car/set :hello/world 1)
     (car/get :hello/world)

@@ -25,7 +25,7 @@
 (defn- blocked-by-user
   [db username]
     (let [blocks
-          (mc/find-one-as-map db :users
+          (mc/find-one-as-map db "users"
                               {:username username}
                               ["username" "options.blocked-users"])]
       [username blocks]))
@@ -36,7 +36,8 @@
     {:keys [channel]} :path-params :as args}]
   (if user
     (let [messages (->> (q/with-collection
-                          db msg-collection
+                          ;; the str call is to appease clj-kondo
+                          db (str msg-collection)
                           (q/find {:channel channel})
                           (q/sort (array-map :date -1))
                           (q/limit 100))

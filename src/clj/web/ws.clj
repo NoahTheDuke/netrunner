@@ -15,49 +15,47 @@
 
 (defn handshake-handler
   "Ring handler fn so accepts a ring request"
-  [{:system/keys [ws] :as request}]
-  (when-let [handshake-fn (:handshake-fn ws)]
+  [{{:keys [handshake-fn]} :system/ws :as request}]
+  (when handshake-fn
     (try (handshake-fn request)
-         (catch Exception ex
-           (timbre/error ex "Caught an error in the ws handshake handler")))))
+      (catch Exception ex
+        (timbre/error ex "Caught an error in the ws handshake handler")))))
 
 (defn post-handler
   "Ring handler fn so accepts a ring request"
-  [{:system/keys [ws] :as request}]
-  (when-let [ajax-post-fn (:ajax-post-fn ws)]
+  [{{:keys [ajax-post-fn]} :system/ws :as request}]
+  (when ajax-post-fn
     (try (ajax-post-fn request)
-         (catch Exception ex
-           (timbre/error ex "Caught an error in the ws post handler")))))
+      (catch Exception ex
+        (timbre/error ex "Caught an error in the ws post handler")))))
 
-(defn chsk-send! [ws uid ev]
-  (when-let [send-fn (:send-fn ws)]
-    (send-fn uid ev)))
-
-(defn connected-sockets [ws]
-  (when-let [connected-uids (:connected-uids ws)]
-    @connected-uids))
+(defn chsk-send! [{:keys [send-fn] :as ws} uid ev]
+  (when send-fn (send-fn uid ev)))
 
 (defn connections
   "internal sente info, ideally don't use this outside of debugging"
-  [ws]
-  (when-let [connections (:conns_ (:private ws))]
-    @connections))
+  [{{:keys [conn_]} :private :as ws}]
+  (when conn_ @conn_))
 
-(defn connected-uids [ws] (seq (:any (connected-sockets ws))))
+(defn connected-sockets [{:keys [connected-uids] :as ws}]
+  (when connected-uids @connected-uids))
 
-(defn buffer-stats [ws]
-  (when-let [{:keys [buffer buffer-size]} ws]
+(defn connected-uids [ws]
+  (seq (:any (connected-sockets ws))))
+
+(defn buffer-stats [{:keys [buffer buffer-size] :as ws}]
+  (when buffer
     {:pending (count (.-buf ^clojure.core.async.impl.channels.ManyToManyChannel buffer))
      :size buffer-size}))
 
 (defn broadcast-to!
   "Sends the given event and msg to all clients in the given uids sequence."
-  [ws uids event msg]
+  [{:keys [buffer] :as ws} uids event msg]
   ;; TODO in high stress situations, multiple go blocks could be competing.
   ;; This could result in out of order messages and thus a stale client.
   ;; To fix, we would want to keep the order of loading correct perhaps by blocking
   ;; successive go blocks until the previous ones have completed
-  (let [buffer (:buffer ws)]
+  (when buffer
     (go
       (doseq [client uids
               :when (some? client)]
@@ -83,9 +81,9 @@
 (defmethod -msg-handler :chsk/uidport-open
   chsk--uidport-open
   [{uid :uid
-    {user :user} :ring-req}]
+    {:system/keys [redis] user :user} :ring-req}]
   (when (active-user? user)
-    (register-user! uid user)))
+    (register-user! redis uid user)))
 
 (defn event-msg-handler
   "Wraps `-msg-handler` with logging, error catching, etc."
@@ -142,8 +140,8 @@
       (assoc :connected-uids connected-uids)
       (assoc :stop-fn (sente/start-server-chsk-router! ch-recv #'event-msg-handler)))))
 
-(defmethod ig/halt-key! :web/ws [a {:keys [buffer rate-limiter stop-fn] :as opts}]
-  (when rate-limiter (put! rate-limiter true))
+(defmethod ig/halt-key! :web/ws [_ {:keys [buffer rate-limiter stop-fn] :as opts}]
+  (when rate-limiter (put! rate-limiter true) (close! rate-limiter))
   (when buffer (close! buffer))
   (when (fn? stop-fn) (stop-fn))
   nil)
