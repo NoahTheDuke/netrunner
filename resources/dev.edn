@@ -6,7 +6,8 @@
                       :connection-string #or [#env MONGO_CONNECTION_URI nil]}
  :redis/connection {:pool {}
                     :spec {}}
- :logging/timbre {:appenders
+ :logging/timbre {:min-level :info
+                  :appenders
                   ;; set appender args:
                   ;; `:enabled?` sets whether an appender should run
                   ;; `:log-path` defaults to `~/logs/jinteki-*.log`
@@ -25,8 +26,12 @@
                      :same-site :lax
                      ; 60 days
                      :max-age 5184000}}
+ :web/ws {:packer :edn
+          :buffer-size 500
+          :buffer-clear-timer-ms 40}
  :web/lobby {:interval 1000
              :mongo #ig/ref :mongodb/connection
+             :web/ws #ig/ref :web/ws
              :time-inactive 600}
  :web/chat {:max-length 144
             ;; sliding window size in seconds
@@ -40,7 +45,9 @@
              :from "support@jinteki.net"
              :reset-subject "Jinteki Password Reset"
              :confirm-reset-subject "Your password has been changed"}
- :web/ws {:packer :edn}
+ :web/telemetry {:web/ws #ig/ref :web/ws
+                 ;; :frequency value is passed to enc/ms so accepts whichever values that accepts
+                 :frequency {:mins 5}}
  :web/app {:server-mode #ig/ref :server/mode
            :mongodb/connection #ig/ref :mongodb/connection
            :redis/connection #ig/ref :redis/connection
@@ -54,7 +61,6 @@
  :frontend/version {:initial "1"
                     :redis #ig/ref :redis/connection
                     :mongo #ig/ref :mongodb/connection}
- :sente/router {:ws #ig/ref :web/ws}
  :game/quotes nil
  :jinteki/cards-version {:initial "1"
                          :redis #ig/ref :redis/connection

@@ -11,7 +11,7 @@
 
 (defn index-page
   ([request] (index-page request nil nil))
-  ([{user :user :system/keys [server-mode ws-config redis]} og replay-id]
+  ([{user :user :system/keys [server-mode ws redis]} og replay-id]
    (let [frontend-version (wcar redis (car/get :frontend-version))]
      (html-response
        200
@@ -49,7 +49,7 @@
           (hiccup/include-js "/lib/js/toastr.min.js")
           [:script {:type "text/javascript"}
            (str "var user=" (json/generate-string user) ";"
-             "var ws_config=" (json/generate-string (or ws-config {})) ";")]
+             "var ws_config=" (json/generate-string {:packer (:packer ws)}) ";")]
           (if (= "dev" server-mode)
             (list (hiccup/include-js "/js/cljs-runtime/goog.base.js")
               (hiccup/include-js "/js/main.js"))

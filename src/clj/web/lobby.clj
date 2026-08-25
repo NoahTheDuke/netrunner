@@ -1,27 +1,30 @@
 (ns web.lobby
   (:require
-    [clojure.core.async :refer [<! go timeout]]
-    [cljc.java-time.instant :as inst]
-    [cljc.java-time.duration :as duration]
-    [cljc.java-time.temporal.chrono-unit :as chrono]
-    [clojure.set :as set]
-    [clojure.string :as str]
-    [com.climate.claypoole :as cp]
-    [crypto.password.bcrypt :as bcrypt]
-    [game.core :as core]
-    [game.utils :refer [server-card]]
-    [jinteki.utils :refer [constructed-game? select-non-nil-keys side-from-str superuser? to?]]
-    [jinteki.preconstructed :refer [all-matchups]]
-    [jinteki.validator :as validator]
-    [medley.core :refer [find-first]]
-    [monger.collection :as mc]
-    [time-literals.read-write :as read-write]
-    [web.app-state :as app-state]
-    [web.mongodb :as mongodb]
-    [web.stats :as stats]
-    [web.ws :as ws]
-    [taoensso.encore :as enc]
-    [taoensso.timbre :as timbre]))
+   [cljc.java-time.duration :as duration]
+   [cljc.java-time.instant :as inst]
+   [cljc.java-time.temporal.chrono-unit :as chrono]
+   [clojure.core.async :refer [<! go timeout]]
+   [clojure.set :as set]
+   [clojure.string :as str]
+   [com.climate.claypoole :as cp]
+   [crypto.password.bcrypt :as bcrypt]
+   [game.core :as core]
+   [game.utils :refer [server-card]]
+   [integrant.core :as ig]
+   [jinteki.preconstructed :refer [all-matchups]]
+   [jinteki.utils :refer [constructed-game? select-non-nil-keys side-from-str
+                          superuser? to?]]
+   [jinteki.validator :as validator]
+   [medley.core :refer [find-first]]
+   [monger.collection :as mc]
+   [taoensso.encore :as enc]
+   [taoensso.timbre :as timbre]
+   [time-literals.read-write :as read-write]
+   [web.app-state :as app-state]
+   [web.mongodb :as mongodb]
+   [web.stats :as stats]
+   [web.utils :refer [tick]]
+   [web.ws :as ws]))
 
 (read-write/print-time-literals-clj!)
 
@@ -92,7 +95,7 @@
   [lobby & expr]
   `(cp/future (get-in ~lobby [:pool :pool] lobby-pool) ~@expr))
 
-(defmulti assign-tournament-properties identity)
+(defmulti assign-tournament-properties second)
 
 (defn validate-precon
   [format client-precon client-gateway-type]
@@ -151,11 +154,11 @@
         :let [uid (:uid user)]]
     [uid [:lobby/notification "ting"]]))
 
-(defn send-lobby-ting [lobby]
+(defn send-lobby-ting [ws lobby]
   (when lobby
     (doseq [[uid ev] (lobby-ting lobby)]
       (when uid
-        (ws/chsk-send! uid ev)))))
+        (ws/chsk-send! ws uid ev)))))
 
 (defn- filter-lobby-user
   "Only take keys that are useful in the lobby from a user map"
@@ -317,23 +320,23 @@
         [uid [:lobby/list filtered-lobbies]]))))
 
 (defn lobby-update-uids
-  []
-  (filter #(app-state/receive-lobby-updates? %) (ws/connected-uids)))
+  [ws]
+  (filterv #(app-state/receive-lobby-updates? %) (ws/connected-uids ws)))
 
 (defn broadcast-lobby-list
   "Sends the lobby list to all users or a given list of users.
   Filters the list per each users block list."
-  ([]
+  ([ws]
    (let [user-cache (:users @app-state/app-state)
-         uids (lobby-update-uids)
+         uids (lobby-update-uids ws)
          users (map #(get user-cache %) uids)]
-     (broadcast-lobby-list users)))
-  ([users]
+     (broadcast-lobby-list ws users)))
+  ([ws users]
    (assert (or (sequential? users) (nil? users)) (str "Users must be a sequence: " (pr-str users)))
    (let [lobbies (app-state/get-lobbies)]
      (doseq [[uid ev] (prepare-lobby-list lobbies users)]
        (when uid
-         (ws/chsk-send! uid ev))))))
+         (ws/chsk-send! ws uid ev))))))
 
 (defn prepare-lobby-state [lobby]
   (let [lobby-state (lobby-summary lobby true)]
@@ -341,11 +344,11 @@
           :let [uid (:uid user)]]
       [uid [:lobby/state lobby-state]])))
 
-(defn send-lobby-state [lobby]
+(defn send-lobby-state [ws lobby]
   (when lobby
     (doseq [[uid ev] (prepare-lobby-state lobby)]
       (when uid
-        (ws/chsk-send! uid ev)))))
+        (ws/chsk-send! ws uid ev)))))
 
 (defn register-lobby
   [lobbies lobby uid]
@@ -358,7 +361,7 @@
   (update lobby :messages conj message))
 
 (defn try-create-lobby
-  [db uid user ?data]
+  [db ws uid user ?data]
   (let [lobby (-> (create-new-lobby {:uid uid :user user :options ?data})
                   (->> (auto-select-decks db))
                   (send-message
@@ -369,54 +372,58 @@
     (when lobby?
       (app-state/set-last-update (:gameid lobby?))
       (assign-tournament-properties lobby?)
-      (send-lobby-state lobby?)
-      (broadcast-lobby-list))))
+      (send-lobby-state ws lobby?)
+      (broadcast-lobby-list ws))))
 
 (defmethod ws/-msg-handler :lobby/create
   lobby--create
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     uid :uid
     ?data :?data
     id :id
     timestamp :timestamp}]
   (lobby-thread
     (if (:block-game-creation @app-state/app-state)
-      (ws/chsk-send! uid [:lobby/toast {:message :lobby_creation-paused
-                                        :type "error"}])
-      (try-create-lobby db uid user ?data))
+      (ws/chsk-send! ws uid [:lobby/toast {:message :lobby_creation-paused
+                                           :type "error"}])
+      (try-create-lobby db ws uid user ?data))
     (log-delay! timestamp id)))
 
-(defn clear-lobby-state [uid]
+(defn clear-lobby-state [ws uid]
   (when uid
-    (ws/chsk-send! uid [:lobby/state])))
+    (ws/chsk-send! ws uid [:lobby/state])))
 
-(defn send-lobby-list [uid]
+(defn send-lobby-list [ws uid]
   (when uid
     (let [[[_ ev]] (prepare-lobby-list (app-state/get-lobbies)
                                        [(app-state/get-user uid)])]
-      (ws/chsk-send! uid ev))
+      (ws/chsk-send! ws uid ev))
     (if-let [lobby (app-state/uid->lobby uid)]
-      (send-lobby-state lobby)
-      (clear-lobby-state uid))))
+      (send-lobby-state ws lobby)
+      (clear-lobby-state ws uid))))
 
 (defmethod ws/-msg-handler :lobby/list
   lobby--list
-  [{uid :uid
+  [{{:system/keys [ws]} :ring-req
+    uid :uid
     id :id
     timestamp :timestamp}]
-  (lobby-thread (send-lobby-list uid)
-                (ws/chsk-send! uid [:lobby/block-game-creation
-                                    (:block-game-creation @app-state/app-state)])
-                (log-delay! timestamp id)))
+  (lobby-thread
+    (send-lobby-list ws uid)
+    (ws/chsk-send! ws uid [:lobby/block-game-creation
+                           (:block-game-creation @app-state/app-state)])
+    (log-delay! timestamp id)))
 
 (defmethod ws/-msg-handler :lobby/block-game-creation
   lobby--block-game-creation
-  [{uid :uid
+  [{{:system/keys [ws]} :ring-req
+    uid :uid
     id :id
     timestamp :timestamp}]
-  (lobby-thread (ws/chsk-send! uid [:lobby/block-game-creation
-                                    (:block-game-creation @app-state/app-state)])
-                (log-delay! timestamp id)))
+  (lobby-thread
+    (ws/chsk-send! ws uid [:lobby/block-game-creation
+                           (:block-game-creation @app-state/app-state)])
+    (log-delay! timestamp id)))
 
 (defn player?
   "Returns player if the uid is a player in a given lobby"
@@ -458,22 +465,22 @@
 
 (defn close-lobby!
   "Closes the given game lobby, booting all players and updating stats."
-  ([db lobby] (close-lobby! db lobby nil))
-  ([db {:keys [gameid pool started on-close] :as lobby} skip-on-close]
+  ([db ws lobby] (close-lobby! db ws lobby nil))
+  ([db ws {:keys [gameid pool started on-close] :as lobby} skip-on-close]
    (when started
      (stats/game-finished db lobby)
      (stats/update-deck-stats db lobby)
      (stats/update-game-stats db lobby)
-     (stats/push-stats-update db lobby))
+     (stats/push-stats-update ws db lobby))
    (swap! app-state/app-state update :lobbies dissoc gameid)
    (app-state/remove-last-update gameid)
    (doseq [uid (keep :uid (get-players-and-spectators lobby))]
-     (clear-lobby-state uid))
+     (clear-lobby-state ws uid))
    (leave-pool! pool gameid)
    (when (and (not skip-on-close) on-close)
      (on-close lobby))))
 
-(defn leave-lobby! [db user uid ?reply-fn lobby]
+(defn leave-lobby! [db ws user uid ?reply-fn lobby]
   (let [leave-message (core/make-system-message (str (:username user) " left the game."))
         new-app-state (swap! app-state/app-state update :lobbies
                              #(handle-leave-lobby % uid leave-message))
@@ -482,15 +489,15 @@
       (when-let [state (:state lobby?)]
         (let [side (side-from-str (:side (player? uid lobby) ""))]
           (swap! state update side dissoc :user)))
-      (close-lobby! db lobby))
-    (send-lobby-state lobby?)
-    (broadcast-lobby-list)
+      (close-lobby! db ws lobby))
+    (send-lobby-state ws lobby?)
+    (broadcast-lobby-list ws)
     (when ?reply-fn (?reply-fn true))
     lobby?))
 
 (defmethod ws/-msg-handler :lobby/leave
   lobby--leave
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     uid :uid
     {gameid :gameid} :?data
     ?reply-fn :?reply-fn
@@ -499,7 +506,7 @@
   (lobby-thread
     (let [lobby (app-state/get-lobby gameid)]
       (when (and lobby (in-lobby? uid lobby))
-        (leave-lobby! db user uid ?reply-fn lobby))
+        (leave-lobby! db ws user uid ?reply-fn lobby))
       (log-delay! timestamp id))))
 
 (defn find-deck
@@ -573,7 +580,7 @@
 
 (defmethod ws/-msg-handler :lobby/deck
   lobby--deck
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     uid :uid
     {:keys [gameid deck-id]} :?data
     ?reply-fn :?reply-fn
@@ -590,7 +597,7 @@
               lobby? (get-in new-app-state [:lobbies (:gameid lobby)])]
           (when lobby?
             (app-state/set-last-update gameid))
-          (send-lobby-state lobby?)
+          (send-lobby-state ws lobby?)
           ;;(broadcast-lobby-list)
           (?reply-fn (some #(= processed-deck (:deck %)) (:players lobby?))))
         (?reply-fn false))
@@ -605,7 +612,7 @@
 
 (defmethod ws/-msg-handler :lobby/say
   lobby--say
-  [{{user :user} :ring-req
+  [{{:system/keys [ws] user :user} :ring-req
     uid :uid
     {:keys [gameid text]} :?data
     id :id
@@ -620,7 +627,7 @@
               lobby? (get-in new-app-state [:lobbies gameid])]
           (when lobby?
             (app-state/set-last-update (:gameid lobby?)))
-          (send-lobby-state lobby?))))
+          (send-lobby-state ws lobby?))))
     (log-delay! timestamp id)))
 
 (defn check-password [lobby user password]
@@ -674,7 +681,7 @@
           (->> (assoc lobbies gameid)))
       lobbies)))
 
-(defn join-lobby! [db user uid ?data ?reply-fn lobby]
+(defn join-lobby! [db ws user uid ?data ?reply-fn lobby]
   (let [correct-password? (check-password lobby user (:password ?data))
         join-message (core/make-system-message (str (:username user) " joined the game."))
         new-app-state (swap! app-state/app-state update :lobbies
@@ -686,9 +693,9 @@
             (let [side (side-from-str (:side player))]
               (when-let [state (:state lobby?)]
                 (swap! state assoc-in [side :user] user))))
-          (send-lobby-state lobby?)
-          (send-lobby-ting lobby?)
-          (broadcast-lobby-list)
+          (send-lobby-state ws lobby?)
+          (send-lobby-ting ws lobby?)
+          (broadcast-lobby-list ws)
           (when ?reply-fn (?reply-fn 200))
           lobby?)
       (false? correct-password?)
@@ -698,7 +705,7 @@
 
 (defmethod ws/-msg-handler :lobby/join
   lobby--join
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     uid :uid
     {gameid :gameid :as ?data} :?data
     ?reply-fn :?reply-fn
@@ -706,7 +713,7 @@
     timestamp :timestamp}]
   (lobby-thread
     (when-let [lobby (app-state/get-lobby gameid)]
-      (join-lobby! db user uid ?data ?reply-fn lobby))
+      (join-lobby! db ws user uid ?data ?reply-fn lobby))
     (log-delay! timestamp id)))
 
 (defn swap-side
@@ -757,7 +764,7 @@
 
 (defmethod ws/-msg-handler :lobby/swap
   lobby--swap
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     uid :uid
     {:keys [gameid side]} :?data
     id :id
@@ -773,13 +780,13 @@
               lobby? (get-in new-app-state [:lobbies gameid])]
           (when lobby?
             (app-state/set-last-update (:gameid lobby?)))
-          (send-lobby-state lobby?)
-          (broadcast-lobby-list))))
+          (send-lobby-state ws lobby?)
+          (broadcast-lobby-list ws))))
     (log-delay! timestamp id)))
 
 (defmethod ws/-msg-handler :lobby/shift-game
   lobby--shift-game
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     {:keys [gameid room]} :?data
     id :id
     timestamp :timestamp}]
@@ -789,9 +796,9 @@
         (let [player-name (-> lobby :original-players first :user :username)
               game-name (:title lobby)
               new-app-state (swap! app-state/app-state assoc-in [:lobbies gameid :room] room)]
-          (send-lobby-state (get-in new-app-state [:lobbies (:gameid lobby)]))
-          (broadcast-lobby-list)
-          (broadcast-lobby-list [id])
+          (send-lobby-state ws (get-in new-app-state [:lobbies (:gameid lobby)]))
+          (broadcast-lobby-list ws)
+          (broadcast-lobby-list ws [id])
           (mc/insert db "moderator_actions"
                      {:moderator (:username user)
                       :action :shift-game
@@ -803,7 +810,7 @@
 
 (defmethod ws/-msg-handler :lobby/rename-game
   lobby--rename-game
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     {:keys [gameid]} :?data
     id :id
     timestamp :timestamp}]
@@ -819,9 +826,9 @@
                             :player-name player-name
                             :lobby-name bad-name}
                            (:username user) "renamed lobby:" bad-name "->" new-name)
-              (send-lobby-state (get-in new-app-state [:lobbies (:gameid lobby)]))
-              (broadcast-lobby-list)
-              (broadcast-lobby-list [id])
+              (send-lobby-state ws (get-in new-app-state [:lobbies (:gameid lobby)]))
+              (broadcast-lobby-list ws)
+              (broadcast-lobby-list ws [id])
               (mc/insert db "moderator_actions"
                          {:moderator (:username user)
                           :action :rename-game
@@ -832,7 +839,7 @@
 
 (defmethod ws/-msg-handler :lobby/delete-game
   lobby--delete-game
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     {:keys [gameid]} :?data
     id :id
     timestamp :timestamp}]
@@ -841,9 +848,9 @@
           player-name (-> lobby :original-players first :user :username)
           bad-name (:title lobby)]
       (when (and (superuser? user) lobby)
-        (close-lobby! db lobby)
-        (broadcast-lobby-list)
-        (broadcast-lobby-list [id])
+        (close-lobby! db ws lobby)
+        (broadcast-lobby-list ws)
+        (broadcast-lobby-list ws [id])
         (mc/insert db "moderator_actions"
                    {:moderator (:username user)
                     :action :delete-game
@@ -854,7 +861,7 @@
 
 (defn clear-inactive-lobbies
   "Called by a background thread to close lobbies that are inactive for some number of seconds."
-  [db time-inactive]
+  [db ws time-inactive]
   (let [changed? (volatile! false)]
     (doseq [{:keys [gameid started] :as lobby} (app-state/get-lobbies)
             :let [last-update (app-state/get-last-update gameid)]]
@@ -863,7 +870,7 @@
                  (not (inst/is-after (inst/now) (inst/plus-seconds last-update (- time-inactive 29)))))
         (let [uids (keep :uid (get-players-and-spectators lobby))]
           (doseq [uid uids]
-            (when uid (ws/chsk-send! uid [:game/timeout-soon gameid])))))
+            (when uid (ws/chsk-send! ws uid [:game/timeout-soon gameid])))))
       (when (and gameid (inst/is-after (inst/now) (inst/plus-seconds last-update time-inactive)))
         (let [uids (keep :uid (get-players-and-spectators lobby))]
           (vreset! changed? true)
@@ -871,12 +878,20 @@
             (stats/game-finished db lobby)
             (doseq [uid uids]
               (when uid
-                (ws/chsk-send! uid [:game/timeout gameid]))))
-          (close-lobby! db lobby)
+                (ws/chsk-send! ws uid [:game/timeout gameid]))))
+          (close-lobby! db ws lobby)
           (doseq [uid uids]
-            (send-lobby-list uid)))))
+            (send-lobby-list ws uid)))))
     (when @changed?
-      (broadcast-lobby-list))))
+      (broadcast-lobby-list ws))))
+
+(defmethod ig/init-key :web/lobby [_ {:keys [interval mongo time-inactive web/ws]}]
+  (let [db (:db mongo)]
+    [(tick #(clear-inactive-lobbies db ws time-inactive) interval)]))
+
+(defmethod ig/halt-key! :web/lobby [_ futures]
+  (run! future-cancel futures))
+
 
 (defn watch-lobby [lobby uid user request-side]
   (if (already-in-game? user lobby)
@@ -901,7 +916,7 @@
 
 (defmethod ws/-msg-handler :lobby/watch
   lobby--watch
-  [{{user :user} :ring-req
+  [{{:system/keys [ws] user :user} :ring-req
     uid :uid
     {:keys [gameid password request-side]} :?data
     ?reply-fn :?reply-fn
@@ -918,9 +933,9 @@
           (cond
             (and lobby? correct-password? (allowed-in-lobby user lobby?))
             (do (app-state/set-last-update gameid)
-                (send-lobby-state lobby?)
-                (send-lobby-ting lobby?)
-                (broadcast-lobby-list)
+                (send-lobby-state ws lobby?)
+                (send-lobby-ting ws lobby?)
+                (broadcast-lobby-list ws)
                 (when ?reply-fn (?reply-fn 200)))
             (false? correct-password?)
             (when ?reply-fn (?reply-fn 403))
@@ -944,10 +959,11 @@
 
 (defmethod ws/-msg-handler :lobby/continue-updates
   lobby--continue-updates
-  [{uid :uid
+  [{{:system/keys [ws]} :ring-req
+    uid :uid
     id :id
     timestamp :timestamp}]
   (lobby-thread
     (app-state/continue-lobby-updates uid)
-    (send-lobby-list uid)
+    (send-lobby-list ws uid)
     (log-delay! timestamp id)))
