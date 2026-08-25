@@ -157,15 +157,15 @@
 
 (defn push-stats-update
   "Gather updated deck and user stats and send via web socket to clients"
-  [db {:keys [ending-players]}]
+  [db ws {:keys [ending-players]}]
   (doseq [player ending-players]
     (let [user-id (get-in player [:user :_id])
           deck-id (get-in player [:deck :_id])
           userstats (:stats (stats-for-user db user-id))
           deckstats (:stats (stats-for-deck db deck-id))]
-      (ws/chsk-send! (:uid player) [:stats/update {:userstats userstats
-                                                   :deck-id (str deck-id)
-                                                   :deckstats deckstats}]))))
+      (ws/chsk-send! ws (:uid player) [:stats/update {:userstats userstats
+                                                      :deck-id (str deck-id)
+                                                      :deckstats deckstats}]))))
 
 (defn game-started
   [db {:keys [gameid date start-date title room players format]}]

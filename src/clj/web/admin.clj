@@ -6,8 +6,7 @@
    [monger.collection :as mc]
    [monger.operators :refer :all]
    [monger.result :refer [acknowledged? updated-existing?]]
-   [taoensso.carmine :refer [wcar]]
-   [taoensso.carmine :as car]
+   [taoensso.carmine :as car :refer [wcar]]
    [web.app-state :as app-state]
    [web.mongodb :refer [->object-id]]
    [web.user :refer [active-user?]]
@@ -21,7 +20,7 @@
 
 (defmethod ws/-msg-handler :admin/announce
   admin--announce
-  [{{user :user} :ring-req
+  [{{:system/keys [ws] user :user} :ring-req
     {message :message} :?data
     reply-fn :?reply-fn}]
   (cond
@@ -29,12 +28,12 @@
     (empty? message) (reply-fn 400)
     :else
     (do
-      (doseq [uid (ws/connected-uids)]
-        (ws/chsk-send! uid [:lobby/toast {:message message
-                                          :type "warning"}]))
+      (doseq [uid (ws/connected-uids ws)]
+        (ws/chsk-send! ws uid [:lobby/toast {:message message
+                                             :type "warning"}]))
       (reply-fn 200))))
 
-(defn news-create-handler [{db :system/db
+(defn news-create-handler [{:system/keys [db]
                             {item :item} :body}]
   (if-not (empty? item)
     (do
@@ -45,7 +44,7 @@
     (response 400 {:message "Missing news item"})))
 
 (defn news-delete-handler
-  [{db :system/db
+  [{:system/keys [db]
     {id :id} :path-params}]
   (try
     (if id
@@ -56,7 +55,7 @@
     (catch Exception _
       (response 409 {:message "Unknown news item id"}))))
 
-(defn version-handler [{db :system/db}]
+(defn version-handler [{:system/keys [db]}]
   (let [config (mc/find-one-as-map db "config" nil)
         version (:version config "0.0")]
     (response 200 {:message "ok" :version version})))
@@ -95,7 +94,7 @@
 
 (defmethod ws/-msg-handler :admin/edit-user
   admin--edit-user
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     {:keys [action user-type username] :as data} :?data
     uid :uid}]
   (if (and (active-user? user)
@@ -117,18 +116,18 @@
                      (update :_id str)))]
       (if user
         (do
-          (ws/broadcast-to! [uid] :admin/user-edit {:success (assoc data :user user)})
+          (ws/broadcast-to! ws [uid] :admin/user-edit {:success (assoc data :user user)})
           (when (= user-type :banned)
             (when-let [connected-user ((:users @app-state/app-state) username)]
-              (ws/broadcast-to! [(:uid connected-user)] :system/force-disconnect {}))))
-        (ws/broadcast-to! [uid] :admin/user-edit {:error "Not found"})))
-    (ws/broadcast-to! [uid] :admin/user-edit {:error "Not allowed"})))
+              (ws/broadcast-to! ws [(:uid connected-user)] :system/force-disconnect {}))))
+        (ws/broadcast-to! ws [uid] :admin/user-edit {:error "Not found"})))
+    (ws/broadcast-to! ws [uid] :admin/user-edit {:error "Not allowed"})))
 
 (def ip-ban-collection "ip-bans")
 
 (defmethod ws/-msg-handler :admin/look-up-ip
   admin--look-up-ip
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     {:keys [username] :as data} :?data
     uid :uid}]
   (if (and (active-user? user)
@@ -138,15 +137,15 @@
                                           :lastIpAddress 1
                                           :last-ip-address 1
                                           :_id 0})]
-      (ws/broadcast-to! [uid] :admin/look-up-ip {:success (-> res
-                                                              (dissoc :lastIpAddress)
-                                                              (assoc :last-ip-address (last-ip-address res)))})
-      (ws/broadcast-to! [uid] :admin/look-up-ip {:error "Not found"}))
-    (ws/broadcast-to! [uid] :admin/look-up-ip {:error "Not allowed"})))
+      (ws/broadcast-to! ws [uid] :admin/look-up-ip {:success (-> res
+                                                               (dissoc :lastIpAddress)
+                                                               (assoc :last-ip-address (last-ip-address res)))})
+      (ws/broadcast-to! ws [uid] :admin/look-up-ip {:error "Not found"}))
+    (ws/broadcast-to! ws [uid] :admin/look-up-ip {:error "Not allowed"})))
 
 (defmethod ws/-msg-handler :admin/fetch-ip-bans
   admin--fetch-ip-bans
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     uid :uid}]
   (if (and (active-user? user)
            (or (:ismoderator user) (:isadmin user)))
@@ -154,12 +153,12 @@
                                 {:username 1
                                  :ip-address 1
                                  :_id 0})]
-      (ws/broadcast-to! [uid] :admin/fetch-ip-bans {:success ip-bans}))
-    (ws/broadcast-to! [uid] :admin/fetch-ip-bans {:error "Not allowed"})))
+      (ws/broadcast-to! ws [uid] :admin/fetch-ip-bans {:success ip-bans}))
+    (ws/broadcast-to! ws [uid] :admin/fetch-ip-bans {:error "Not allowed"})))
 
 (defmethod ws/-msg-handler :admin/ip-ban-user
   admin--ip-ban-user
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     {:keys [username] :as data} :?data
     uid :uid}]
   (if (and (active-user? user)
@@ -174,15 +173,15 @@
           (prn "res: " res)
           (prn "ip: " ip)
           (mc/insert db ip-ban-collection {:username username :ip-address ip})
-          (ws/broadcast-to! [uid] :admin/ip-ban-user {:success {:username username
+          (ws/broadcast-to! ws [uid] :admin/ip-ban-user {:success {:username username
                                                                 :ip-address ip}}))
-        (ws/broadcast-to! [uid] :admin/ip-ban-user {:error "Legacy user? No IP Address on record"}))
-      (ws/broadcast-to! [uid] :admin/ip-ban-user {:error "Not found"}))
-    (ws/broadcast-to! [uid] :admin/ip-ban-user {:error "Not allowed"})))
+        (ws/broadcast-to! ws [uid] :admin/ip-ban-user {:error "Legacy user? No IP Address on record"}))
+      (ws/broadcast-to! ws [uid] :admin/ip-ban-user {:error "Not found"}))
+    (ws/broadcast-to! ws [uid] :admin/ip-ban-user {:error "Not allowed"})))
 
 (defmethod ws/-msg-handler :admin/ip-unban-user
   admin--ip-unban-user
-    [{{db :system/db user :user} :ring-req
+    [{{:system/keys [db ws] user :user} :ring-req
     {:keys [username] :as data} :?data
       uid :uid}]
   (if (and (active-user? user)
@@ -190,13 +189,13 @@
     (let [result (mc/remove db ip-ban-collection {:username username})
           n (.getN result)]
       (if (pos? n)
-        (ws/broadcast-to! [uid] :admin/ip-unban-user {:success username})
-        (ws/broadcast-to! [uid] :admin/ip-unban-user {:error "Not found"})))
-    (ws/broadcast-to! [uid] :admin/ip-unban-user {:error "Not allowed"})))
+        (ws/broadcast-to! ws [uid] :admin/ip-unban-user {:success username})
+        (ws/broadcast-to! ws [uid] :admin/ip-unban-user {:error "Not found"})))
+    (ws/broadcast-to! ws [uid] :admin/ip-unban-user {:error "Not allowed"})))
 
 (defmethod ws/-msg-handler :admin/fetch-users
   admin--fetch-users
-  [{{db :system/db user :user} :ring-req
+  [{{:system/keys [db ws] user :user} :ring-req
     uid :uid}]
   (if (and (active-user? user)
            (or (:ismoderator user) (:isadmin user)))
@@ -206,8 +205,8 @@
                                                             {:banned true}]}
                                    [:_id :username :ismoderator :special :tournament-organizer :banned])
                      (map #(update % :_id str)))]
-      (ws/broadcast-to! [uid] :admin/fetch-users {:success users}))
-    (ws/broadcast-to! [uid] :admin/fetch-users {:error "Not allowed"})))
+      (ws/broadcast-to! ws [uid] :admin/fetch-users {:success users}))
+    (ws/broadcast-to! ws [uid] :admin/fetch-users {:error "Not allowed"})))
 
 (defmethod ws/-msg-handler :admin/block-game-creation
   admin--block-game-creation

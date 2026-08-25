@@ -172,16 +172,19 @@
   (middleware/map->Middleware
     {:name ::wrap-system
      :description "Adds the relevant integrant system pieces to requests"
-     :wrap (fn [handler system]
+     :wrap (fn [handler {:web/keys [auth chat email ws]
+                         :keys [server-mode]
+                         redis :redis/connection
+                         {db :db} :mongodb/connection}]
              (fn [request]
                (-> request
-                   (assoc :system/db (-> system :mongodb/connection :db))
-                   (assoc :system/server-mode (:server-mode system))
-                   (assoc :system/redis (:redis/connection system))
-                   (assoc :system/auth (:web/auth system))
-                   (assoc :system/chat (:web/chat system))
-                   (assoc :system/email (:web/email system))
-                   (assoc :system/ws-config (:web/ws system))
+                   (assoc :system/auth auth)
+                   (assoc :system/chat chat)
+                   (assoc :system/db db)
+                   (assoc :system/email email)
+                   (assoc :system/redis redis)
+                   (assoc :system/server-mode server-mode)
+                   (assoc :system/ws ws)
                    (handler))))}))
 
 (defn make-middleware [system]

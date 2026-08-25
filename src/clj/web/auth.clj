@@ -14,6 +14,7 @@
    [postal.core :as mail]
    [ring.util.response :refer [redirect]]
    [taoensso.carmine :refer [wcar]]
+   [taoensso.timbre :as timbre]
    [web.analytics :refer [update-analytics]]
    [web.app-state :as app-state]
    [web.mongodb :refer [->object-id find-one-as-map-case-insensitive]]
@@ -31,7 +32,8 @@
 
 (defn unsign-token [{:keys [secret]} token]
   (try (jwt/unsign token secret {:alg :hs512})
-       (catch Exception _ (prn "Received invalid cookie " token))))
+       (catch Exception _
+         (timbre/error "Received invalid cookie" token))))
 
 (defn wrap-authentication-required [handler]
   (fn [{user :user :as req}]
