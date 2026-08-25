@@ -29,10 +29,13 @@
  :web/ws {:packer :edn
           :buffer-size 500
           :buffer-clear-timer-ms 40}
- :web/lobby {:interval 1000
+ :web/lobby {:time-inactive 600
+             ;; :interval and :clear-out-frequency are passed to enc/ms
+             :interval {:secs 1}
+             :clear-out-frequency {:mins 5}
              :mongo #ig/ref :mongodb/connection
-             :web/ws #ig/ref :web/ws
-             :time-inactive 600}
+             :ws #ig/ref :web/ws
+             :redis #ig/ref :redis/connection}
  :web/chat {:max-length 144
             ;; sliding window size in seconds
             :rate-window 60
@@ -46,8 +49,9 @@
              :reset-subject "Jinteki Password Reset"
              :confirm-reset-subject "Your password has been changed"}
  :web/telemetry {:web/ws #ig/ref :web/ws
-                 ;; :frequency value is passed to enc/ms so accepts whichever values that accepts
-                 :frequency {:mins 5}}
+                 :web/redis #ig/ref :redis/connection
+                 ;; :frequency is passed to enc/ms
+                 :frequency {:secs 30}}
  :web/app {:server-mode #ig/ref :server/mode
            :mongodb/connection #ig/ref :mongodb/connection
            :redis/connection #ig/ref :redis/connection
