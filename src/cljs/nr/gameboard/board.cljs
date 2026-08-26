@@ -28,7 +28,7 @@
    [nr.gameboard.state :refer [game-state not-spectator? replay-side]]
    [nr.sounds :refer [update-audio]]
    [nr.translations :refer [tr tr-data tr-game-prompt tr-side tr-element tr-span]]
-   [nr.utils :refer [banned-span card-colors-class card-colors-custom-style
+   [nr.utils :refer [banned-span card-colors-class card-colors-custom-style ->instant
                      checkbox-button cond-button get-image-path
                      image-or-face map-longest precon-decklist-links
                      render-icons render-message]]
@@ -2100,7 +2100,8 @@
 (defn- time-until
   "Helper method for timer. Computes how much time is left until `end`"
   [end]
-  (let [now (inst/now)
+  (let [end (->instant end)
+        now (inst/now)
         diff (duration/between now end)
         total-seconds (duration/get diff chrono/seconds)
         minutes (abs (quot total-seconds 60))
