@@ -4,6 +4,7 @@
    [cljc.java-time.format.date-time-formatter :as formatter]
    [cljc.java-time.zoned-date-time :as zdt]
    [cljc.java-time.zone-id :as zone]
+   [cljc.java-time.instant :as inst]
    [clojure.string :refer [join] :as s]
    [goog.object :as gobject]
    [goog.string :as gstring]
@@ -531,3 +532,14 @@
           local-time (zdt/with-zone-same-instant parsed default-zone)]
       (formatter/format formatter local-time))
     (catch js/Object e "dunno")))
+
+(defn ->instant
+  "Coerce a value to a js-joda Instant.
+   Accepts Instant, JS Date, or anything with a millisecond epoch."
+  [x]
+  (cond
+    (instance? js/java.time.Instant x) x
+    (instance? js/Date x) (inst/of-epoch-milli (.getTime x))
+    (number? x) (inst/of-epoch-milli x)
+    :else (do (prn "cannot convert to instant: " {:value x :type (type x)})
+              (inst/of-epoch-milli 1787702400000))))

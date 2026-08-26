@@ -8,7 +8,7 @@
    [cljc.java-time.instant :as inst]
    [cljc.java-time.duration :as duration]
    [cljc.java-time.temporal.chrono-unit :as chrono]
-   [nr.utils :refer [cond-button non-game-toast]]
+   [nr.utils :refer [cond-button non-game-toast ->instant]]
    ["react" :as react]
    [reagent.core :as r]
    [clojure.string :as str]))
@@ -180,7 +180,8 @@
 (defn- time-until
   "Helper method for game-time. Computes how many minutes since game start"
   [end]
-  (let [now (inst/now)
+  (let [end (->instant end)
+        now (inst/now)
         diff (duration/between now end)
         total-seconds (duration/get diff chrono/seconds)
         minutes (quot total-seconds 60)
