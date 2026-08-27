@@ -119,18 +119,16 @@
 (defn select-non-nil-keys
   "Returns a map containing only those entries in map whose key is in keys and whose value is non-nil"
   [m keyseq]
-  (loop [ret (transient {})
-         keyseq (seq keyseq)]
-    (if keyseq
-      (let [k (first keyseq)
-            entry (get m k ::not-found)]
-        (recur
-          (if (and (not= entry ::not-found)
-                   (some? entry))
-            (assoc! ret k entry)
-            ret)
-          (next keyseq)))
-      (with-meta (persistent! ret) (meta m)))))
+  (-> (reduce
+       (fn [acc k]
+         (let [entry (k m)]
+           (if (nil? entry)
+             acc
+             (assoc! acc k entry))))
+       (transient {})
+       keyseq)
+      (persistent!)
+      (with-meta (meta m))))
 
 (def descriptions
   "Game description options when creating a lobby."
