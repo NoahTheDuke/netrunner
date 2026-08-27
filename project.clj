@@ -72,7 +72,7 @@
 
   :profiles {:dev {:dependencies [[binaryage/devtools "1.0.7"]
                                   [cider/piggieback "0.5.3"]
-                                  [com.clojure-goes-fast/clj-async-profiler "0.5.1"]
+                                  [com.clojure-goes-fast/clj-async-profiler "1.8.0"]
                                   [rewrite-clj "1.1.45"]
                                   [criterium "0.4.6"]
                                   [instaparse "1.5.0"]

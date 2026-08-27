@@ -75,7 +75,7 @@
 (declare toast)
 (defn handle-timeout [gameid]
   (when (= gameid (current-gameid app-state))
-    (toast [:game_inactivity "Game closed due to inactivity"]) "error" {:time-out 0 :close-button true}
+    (toast [:game_inactivity "Game closed due to inactivity"] "error" {:time-out 0 :close-button true})
     (leave-game!)))
 
 (defn handle-timeout-soon [gameid]

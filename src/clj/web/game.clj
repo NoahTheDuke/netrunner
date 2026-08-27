@@ -50,14 +50,15 @@
   [f {state :state :as lobby} & args]
   (when (and state @state)
     (let [old-state @state
-          _ (apply f state args)
+          ret (apply f state args)
           spectators? (seq (:spectators lobby))
           corp-spectators? (seq (:corp-spectators lobby))
           runner-spectators? (seq (:runner-spectators lobby))
           diffs (diffs/public-diffs old-state state spectators? corp-spectators? runner-spectators?)]
       (swap! state assoc :public-states (:public-states diffs))
       (swap! state update :history conj (:hist-diff diffs))
-      (send-state-diffs lobby diffs))))
+      (send-state-diffs lobby diffs)
+      ret)))
 
 (defn handle-message-and-send-diffs!
   "If the given message is a command, passes through to `update-and-send-diffs!`.
@@ -70,10 +71,11 @@
         ;; if side is nil, then it's a notification
         (let [f (if (some? side) main/handle-say main/handle-notification)
               old-state @state
-              _ (f state side user message)
+              ret (f state side user message)
               diffs (diffs/message-diffs old-state state)]
           (swap! state update :history conj (:hist-diff diffs))
-          (send-state-diffs lobby diffs))))))
+          (send-state-diffs lobby diffs)
+          ret)))))
 
 (defn select-state [uid {:keys [corp-spectators runner-spectators]} side {:keys [runner-state corp-state spect-state corp-spect-state runner-spect-state]}]
   (json/generate-string
