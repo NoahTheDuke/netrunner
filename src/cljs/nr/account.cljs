@@ -351,7 +351,7 @@
                                  :on-change #(let [checked (.. % -target -checked)]
                                                (when checked
                                                  (play-sfx [(select-random-from-grouping grouping)]
-                                                           {:volume (or (:sounds-volume @s) 50)
+                                                           {:volume (:sounds-volume @s)
                                                             :force true}))
                                                (swap! s assoc-in [:bespoke-sounds grouping] checked))}]
                  [tr-span [:settings_bespoke-sounds group-name] {:sound group-name}]]]))]
@@ -765,7 +765,7 @@
                     :min 1 :max 100 :step 1
                     :on-mouse-up #(play-sfx [(random-sound)] {:volume (int (.. % -target -value))})
                     :on-change #(swap! s assoc :sounds-volume (.. % -target -value))
-                    :value (or (:sounds-volume @s) 50)
+                    :value (:sounds-volume @s)
                     :disabled (not (or (:sounds @s) (:lobby-sounds @s)))}]]
 
           [tr-element :h4 [:settings_layout-device "Device Layout"]]

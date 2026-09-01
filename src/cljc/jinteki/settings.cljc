@@ -375,7 +375,7 @@
     :validate-fn boolean?
     :doc "Enable in-game sound effects on this device"}
    {:key :sounds-volume
-    :default 100
+    :default 50
     :sync? false  ; device-specific
     :validate-fn number?
     :doc "Sound effects volume level (0-100) on this device"}
