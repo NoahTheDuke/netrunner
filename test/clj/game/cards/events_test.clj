@@ -5549,8 +5549,9 @@
                :runner {:hand ["Paper Tripping"]}})
     (take-credits state :corp)
     (gain-tags state :runner 100)
-    (play-from-hand state :runner "Paper Tripping")
-    (is (zero? (count-tags state)) "Runner should lose all tags")))
+    (is (changed? [(count-tags state) -100]
+          (play-from-hand state :runner "Paper Tripping"))
+      "Runner should lose all tags")))
 
 (deftest peace-in-our-time-no-runs-allowed
     ;; no runs allowed

@@ -3168,7 +3168,9 @@
 
 (defcard "Paper Tripping"
   {:on-play
-   {:msg "remove all tags"
+   {:msg (simple-msg
+           {:effect/type :remove-all-tags
+            :effect/count (count-tags state)})
     :change-in-game-state {:req (req tagged)}
     :async true
     :effect (effect (lose-tags state side eid :all))}})

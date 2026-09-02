@@ -96,9 +96,15 @@
 (register-effect :draw-cards $count)
 (register-effect :gain-clicks $count)
 (register-effect :lose-clicks $count)
+
+;; tags
+
+(register-effect :avoid-tags $count)
 (register-effect :take-tags $count)
 (register-effect :remove-tags $count)
-(register-effect :avoid-tags $count)
+(register-effect :remove-all-tags $count)
+
+;; runner shuffling
 
 (register-effect :shuffle-grip-into-stack)
 (register-effect :shuffle-grip-and-heap-into-stack)
@@ -106,7 +112,11 @@
 (register-effect :shuffle-cards-into-stack $count $titles)
 (register-effect :shuffle-stack)
 
+;; corp shuffling
+
 (register-effect :shuffle-cards-in-server-into-rd $server)
+
+;; score area stuff
 
 (register-effect :forfeit $title)
 (register-effect :add-self-to-score-area $value)

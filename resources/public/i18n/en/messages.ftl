@@ -121,25 +121,21 @@ lose-clicks = lose {$count ->
     *[other] {$count} [Click]
 }
 
+# tags
+
 avoid-tags = avoid {$count ->
     [one] 1 tag
     *[other] {$count} tags
 }
-
 take-tags = take {$count ->
     [one] 1 tag
     *[other] {$count} tags
 }
-
 remove-tags = remove {$count ->
     [one] 1 tag
     *[other] {$count} tags
 }
-
-charge-card = trash {$card-str} {$count ->
-    [one] 1 time
-    *[other] {$count} times
-}
+remove-all-tags = remove all tags ({$count})
 
 # runner shuffling
 
@@ -246,6 +242,11 @@ remove-advancement-counters = remove {$count ->
 place-virus-counters = place {$count ->
     [one] 1 virus counter on {$title}
     *[other] {$count} virus counters on {$title}
+}
+
+charge-card = trash {$card-str} {$count ->
+    [one] 1 time
+    *[other] {$count} times
 }
 
 place-credits-on-self = place {$credits} {-credit} on itself
