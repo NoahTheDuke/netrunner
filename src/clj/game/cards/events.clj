@@ -2976,7 +2976,9 @@
              :automatic :gain-credits
              :req (req (get-in card [:special :run-again])
                             (= :rd (target-server context)))
-             :msg "gain 4 [Credits]"
+             :msg (simple-msg
+                    {:effect/type :gain-credits
+                     :effect/count 4})
              :async true
              :effect (effect (gain-credits state side eid 4))}
             {:event :run-ends

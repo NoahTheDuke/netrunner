@@ -5082,101 +5082,101 @@
         "Corp took 1 BP without getting a prompt")))
 
 (deftest mobius-second-run-triggered
-    ;; Second run triggered
-    (do-game
-      (new-game {:runner {:deck [(qty "Möbius" 3)]}})
-      (starting-hand state :corp ["Hedge Fund"])
-      (take-credits state :corp)
-      (play-from-hand state :runner "Möbius")
-      (run-continue-until state :success)
-      (click-prompt state :runner "No action")
-      (click-prompt state :runner "Yes")
-      (is (= [:rd] (get-in @state [:run :server])) "Second run on R&D triggered")
-      (run-continue state)
-      (run-continue state)
-      (click-prompt state :runner "No action")
-      (is (not (:run @state)) "Run is over")
-      (is (no-prompt? state :runner) "No prompt to run a third time")))
+  ;; Second run triggered
+  (do-game
+    (new-game {:runner {:deck [(qty "Möbius" 3)]}})
+    (starting-hand state :corp ["Hedge Fund"])
+    (take-credits state :corp)
+    (play-from-hand state :runner "Möbius")
+    (run-continue-until state :success)
+    (click-prompt state :runner "No action")
+    (click-prompt state :runner "Yes")
+    (is (= [:rd] (get-in @state [:run :server])) "Second run on R&D triggered")
+    (run-continue state)
+    (run-continue state)
+    (click-prompt state :runner "No action")
+    (is (not (:run @state)) "Run is over")
+    (is (no-prompt? state :runner) "No prompt to run a third time")))
 
 (deftest mobius-gain-4-credits-after-succesful-second-run
-    ;; Gain 4 credits after succesful second run
-    (do-game
-      (new-game {:runner {:deck [(qty "Möbius" 3)]}})
-      (starting-hand state :corp ["Hedge Fund"])
-      (take-credits state :corp)
-      (is (= 5 (:credit (get-runner))))
-      (play-from-hand state :runner "Möbius")
-      (run-continue-until state :success)
-      (is (= 5 (:credit (get-runner))))
-      (click-prompt state :runner "No action")
-      (click-prompt state :runner "Yes")
-      (run-continue state)
-      (run-continue state)
-      (click-prompt state :runner "No action")
-      (is (= 9 (:credit (get-runner))))))
+  ;; Gain 4 credits after succesful second run
+  (do-game
+    (new-game {:runner {:deck [(qty "Möbius" 3)]}})
+    (starting-hand state :corp ["Hedge Fund"])
+    (take-credits state :corp)
+    (is (= 5 (:credit (get-runner))))
+    (play-from-hand state :runner "Möbius")
+    (run-continue-until state :success)
+    (is (= 5 (:credit (get-runner))))
+    (click-prompt state :runner "No action")
+    (click-prompt state :runner "Yes")
+    (run-continue state)
+    (run-continue state)
+    (click-prompt state :runner "No action")
+    (is (= 9 (:credit (get-runner))))))
 
 (deftest mobius-no-second-run-if-first-is-unsuccesful
-    ;; No second run if first is unsuccesful
-    (do-game
-      (new-game {:runner {:deck [(qty "Möbius" 3)]}})
-      (starting-hand state :corp ["Hedge Fund"])
-      (take-credits state :corp)
-      (play-from-hand state :runner "Möbius")
-      (run-continue state)
-      (run-jack-out state)
-      (is (no-prompt? state :runner) "No option to run again on unsuccessful run")))
+  ;; No second run if first is unsuccesful
+  (do-game
+    (new-game {:runner {:deck [(qty "Möbius" 3)]}})
+    (starting-hand state :corp ["Hedge Fund"])
+    (take-credits state :corp)
+    (play-from-hand state :runner "Möbius")
+    (run-continue state)
+    (run-jack-out state)
+    (is (no-prompt? state :runner) "No option to run again on unsuccessful run")))
 
 (deftest mobius-normal-rnd-run-does-not-gain-cred
-    ;; Normal rnd run does not gain cred
-    (do-game
-      (new-game {:runner {:deck [(qty "Möbius" 3)]}})
-      (starting-hand state :corp ["Hedge Fund"])
-      (take-credits state :corp)
-      (play-from-hand state :runner "Möbius")
-      (run-continue-until state :success)
-      (click-prompt state :runner "No action")
-      (click-prompt state :runner "Yes")
-      (run-continue state)
-      (run-continue state)
-      (click-prompt state :runner "No action")
-      (is (changed? [(:credit (get-runner)) 0]
-            (run-empty-server state :rd)
-            (click-prompt state :runner "No action"))
-          "Normal run on R&D didn't give any credits")))
+  ;; Normal rnd run does not gain cred
+  (do-game
+    (new-game {:runner {:deck [(qty "Möbius" 3)]}})
+    (starting-hand state :corp ["Hedge Fund"])
+    (take-credits state :corp)
+    (play-from-hand state :runner "Möbius")
+    (run-continue-until state :success)
+    (click-prompt state :runner "No action")
+    (click-prompt state :runner "Yes")
+    (run-continue state)
+    (run-continue state)
+    (click-prompt state :runner "No action")
+    (is (changed? [(:credit (get-runner)) 0]
+          (run-empty-server state :rd)
+          (click-prompt state :runner "No action"))
+      "Normal run on R&D didn't give any credits")))
 
 (deftest mobius-recurred-use
-    ;; Recurred use
-    (do-game
-      (new-game {:runner {:deck ["Möbius" "Déjà Vu"]}})
-      (starting-hand state :corp ["Hedge Fund"])
-      (take-credits state :corp)
-      (is (= 5 (:credit (get-runner))))
-      (play-from-hand state :runner "Möbius")
-      (run-continue state)
-      (run-continue state)
-      (is (= 5 (:credit (get-runner))))
-      (click-prompt state :runner "No action")
-      (click-prompt state :runner "Yes")
-      (is (= [:rd] (get-in @state [:run :server])) "Second run on R&D triggered")
-      (run-continue state)
-      (run-continue state)
-      (click-prompt state :runner "No action")
-      (is (= 9 (:credit (get-runner))))
-      (play-from-hand state :runner "Déjà Vu")
-      (click-prompt state :runner (find-card "Möbius" (:discard (get-runner))))
-      (is (no-prompt? state :runner) "Recurring a non-virus card stops Déjà Vu prompting further")
-      (is (= 1 (count (:hand (get-runner)))))
-      (play-from-hand state :runner "Möbius")
-      (run-continue state)
-      (run-continue state)
-      (is (= 7 (:credit (get-runner))))
-      (click-prompt state :runner "No action")
-      (click-prompt state :runner "Yes")
-      (is (= [:rd] (get-in @state [:run :server])) "Second run on R&D triggered")
-      (run-continue state)
-      (run-continue state)
-      (click-prompt state :runner "No action")
-      (is (= 11 (:credit (get-runner))))))
+  ;; Recurred use
+  (do-game
+    (new-game {:runner {:deck ["Möbius" "Déjà Vu"]}})
+    (starting-hand state :corp ["Hedge Fund"])
+    (take-credits state :corp)
+    (is (= 5 (:credit (get-runner))))
+    (play-from-hand state :runner "Möbius")
+    (run-continue state)
+    (run-continue state)
+    (is (= 5 (:credit (get-runner))))
+    (click-prompt state :runner "No action")
+    (click-prompt state :runner "Yes")
+    (is (= [:rd] (get-in @state [:run :server])) "Second run on R&D triggered")
+    (run-continue state)
+    (run-continue state)
+    (click-prompt state :runner "No action")
+    (is (= 9 (:credit (get-runner))))
+    (play-from-hand state :runner "Déjà Vu")
+    (click-prompt state :runner (find-card "Möbius" (:discard (get-runner))))
+    (is (no-prompt? state :runner) "Recurring a non-virus card stops Déjà Vu prompting further")
+    (is (= 1 (count (:hand (get-runner)))))
+    (play-from-hand state :runner "Möbius")
+    (run-continue state)
+    (run-continue state)
+    (is (= 7 (:credit (get-runner))))
+    (click-prompt state :runner "No action")
+    (click-prompt state :runner "Yes")
+    (is (= [:rd] (get-in @state [:run :server])) "Second run on R&D triggered")
+    (run-continue state)
+    (run-continue state)
+    (click-prompt state :runner "No action")
+    (is (= 11 (:credit (get-runner))))))
 
 (deftest modded
   ;; Modded - Install a program or piece of hardware at a 3 credit discount
@@ -5199,18 +5199,18 @@
 
 (deftest moshing
   (do-game
-      (new-game {:runner {:deck [(qty "Sure Gamble" 5)]
-                          :hand ["Moshing" (qty "Lamprey" 3)]}})
-      (take-credits state :corp)
-      (is (= 0 (count (:discard (get-runner)))) "Runner has no cards in heap")
-      (is (= 4 (count (:hand (get-runner)))) "Runner starts with 4 cards")
-      (is (not (find-card "Sure Gamble" (:hand (get-runner)))) "Runner does not have Sure Gamble in grip")
-      (play-from-hand state :runner "Moshing")
-      (is (= 0 (count (:discard (get-runner)))) "Moshing is still in play")
-      (dotimes [card 3] (click-card state :runner (nth (:hand (get-runner)) card)))
-      (is (= 4 (count (:discard (get-runner)))) "Runner trashed 3 cards and discarded Moshing")
-      (is (= 3 (count (:hand (get-runner)))) "Runner draws 3 cards")
-      (is (find-card "Sure Gamble" (:hand (get-runner))) "Runner drew Sure Gamble")))
+    (new-game {:runner {:deck [(qty "Sure Gamble" 5)]
+                        :hand ["Moshing" (qty "Lamprey" 3)]}})
+    (take-credits state :corp)
+    (is (= 0 (count (:discard (get-runner)))) "Runner has no cards in heap")
+    (is (= 4 (count (:hand (get-runner)))) "Runner starts with 4 cards")
+    (is (not (find-card "Sure Gamble" (:hand (get-runner)))) "Runner does not have Sure Gamble in grip")
+    (play-from-hand state :runner "Moshing")
+    (is (= 0 (count (:discard (get-runner)))) "Moshing is still in play")
+    (dotimes [card 3] (click-card state :runner (nth (:hand (get-runner)) card)))
+    (is (= 4 (count (:discard (get-runner)))) "Runner trashed 3 cards and discarded Moshing")
+    (is (= 3 (count (:hand (get-runner)))) "Runner draws 3 cards")
+    (is (find-card "Sure Gamble" (:hand (get-runner))) "Runner drew Sure Gamble")))
 
 (deftest mutual-favor
   ;; Mutual Favor
