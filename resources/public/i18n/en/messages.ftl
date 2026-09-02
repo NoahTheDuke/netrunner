@@ -77,6 +77,12 @@ join-list = ,{" "}
 
 ## Ability fragments
 
+# generic
+
+do-nothing = do nothing
+play-card = play {$title}
+play-card-no-additional-costs = play {$title}, ignoring additional costs
+
 # trashing cards
 
 trash-card = trash {$card-str}
@@ -217,9 +223,12 @@ reveal-top-of-stack = reveal {$title} from the top of {-stack}
 disable-corp-id = disable {-corp(case:"nominative")} identity
 disable-runner-id = disable {-runner(case:"nominative")} identity
 
-do-nothing = do nothing
+# turns
 
 take-additional-turn = take an additional turn after this one
+reduce-corp-max-hand-size-bad-publicity = reduce {-corp(case:"possessive")} maximum hand size by 1 for each {-bad-publicity}
+
+# rearrange stuff
 
 rearrange-installed-ice = rearrange any number of ice protecting all servers
 rearrange-top-n-cards-rd = rearrange the top {$count ->
@@ -231,7 +240,7 @@ trash-or-rearrange-top-of-stack = look at and trash or rearrange the top {$count
     *[other] {$count} cards of {-stack}
 }
 
-install-program-from-stack = install a {-program} from {-stack}
+# advancement counters
 
 place-n-advancement-counters = place {$count ->
     [zero] no advancement counters on {$card-str}
@@ -293,8 +302,6 @@ each-player-draws-cards = make each player draw {$count ->
     *[other] {$count} cards
 }
 
-reduce-corp-max-hand-size-bad-publicity = reduce {-corp(case:"possessive")} maximum hand size by 1 for each {-bad-publicity}
-
 # all installs
 
 # runner installs
@@ -306,6 +313,9 @@ install-from-grip-with-discount = install {$title} from {-grip}, lowering the co
 
 install-from-stack = install {$title} from {-stack}
 install-from-stack-with-discount = install {$title} from {-stack}, lowering the cost by {$discount}
+install-program-from-stack = install a {-program} from {-stack}
+
+# rezzing
 
 rez-card = rez {$card-str}
 derez-card = derez {$card-str}
@@ -318,11 +328,19 @@ make-a-run-on = make a run on {$server}
 run-on-with-no-rezzed-ice = make a run on {$server} during which no ice can be rezzed
 rfg-to-make-a-run-on = remove {$title} from the game to make a run on {$server}
 
+# redirect run
+
+redirect-run-to-archives = change the attacked server to {-archives}
+redirect-run-to-hq = change the attacked server to {-hq}
+redirect-run-to-rd = change the attacked server to {-rd}
+
 # icebreaker strength
 
 give-strength-to-icebreaker-during-run = give +{$bonus} strength to {$title} during the run
 give-strength-to-icebreaker-remainder-of-run = give +{$bonus} strength to {$card-str} during the run
 give-strength-all-icebreakers-during-run = give +{$bonus} strength to all icebreakers during the run
+
+# ice
 
 bypass-ice = bypass {$title}
 
@@ -331,8 +349,6 @@ prevent-corp-rez-card-during-turn = prevent {-corp(case:"nominative")} from rezz
 prevent-corp-rez-non-ice-on-runner-turn = prevent {-corp(case:"nominative")} from rezzing non-ice cards during {-runner(case:"possessive")} turn
 
 increase-rez-cost-first-unrezzed-approached-ice = increase the rez cost of the first unrezzed {-ice} approached by {$credits} {-credit}
-
-redirect-run-to-hq = change the attacked server to {-hq}
 
 # Damage
 
@@ -356,6 +372,7 @@ access-additional-in-rd = access {$count ->
 }
 
 search-stack-for-connection-resource = search {-stack} for a connection resource
+search-stack-for-run-event = search {-stack} for a run event
 search-stack-for-virtual-resource = search {-stack} for a virtual resource
 
 ## Specific card abilities

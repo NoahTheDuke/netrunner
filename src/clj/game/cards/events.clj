@@ -3231,7 +3231,11 @@
                                          (can-pay? state side (assoc eid :source card :source-type :play) % nil
                                                    [(->c :credit (play-cost state side %))]))
                                    (:deck runner))))
-    :msg (msg "play " (:title target))
+    :msg (simple-msg
+           :search-stack-for-run-event
+           :shuffle-stack
+           {:effect/type :play-card-no-additional-costs
+            :effect/title target})
     :async true
     :effect (effect (trigger-event state side :searched-stack)
                     (shuffle! state side :deck)

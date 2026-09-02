@@ -76,6 +76,12 @@
 (register-effect :use-card $username $title $do-ability)
 (register-effect :pay-use-card $username $payment $title $do-ability)
 
+;; generic
+
+(register-effect :do-nothing)
+(register-effect :play-card $title)
+(register-effect :play-card-no-additional-costs $title)
+
 ;; trashing
 
 (register-effect :trash-card $card-str)
@@ -162,16 +168,18 @@
 (register-effect :disable-corp-id)
 (register-effect :disable-runner-id)
 
-(register-effect :do-nothing)
+;; turns
 
 (register-effect :take-additional-turn)
-(register-effect :prevent-damage-until-next-turn)
-(register-effect :prevent-corp-rez-non-ice-on-runner-turn)
 (register-effect :reduce-corp-max-hand-size-bad-publicity)
+
+;; rearrange stuff
 
 (register-effect :rearrange-installed-ice)
 (register-effect :rearrange-top-n-cards-rd $count)
 (register-effect :trash-or-rearrange-top-of-stack $count)
+
+;; advancement counters
 
 (register-effect :place-n-advancement-counters $count $card-str)
 (register-effect :remove-advancement-counters $count $card-str)
@@ -200,6 +208,8 @@
 
 (register-effect :each-player-draws-cards $count)
 
+;; runner installs
+
 (register-effect :runner-install-card $title)
 
 (register-effect :install-from-grip $title)
@@ -208,6 +218,8 @@
 (register-effect :install-from-stack $title)
 (register-effect :install-from-stack-with-discount $title $discount)
 (register-effect :install-program-from-stack)
+
+;; rezzing
 
 (register-effect :rez-card $card-str)
 (register-effect :derez-card $card-str)
@@ -220,21 +232,26 @@
 (register-effect :run-on-with-no-rezzed-ice $server)
 (register-effect :rfg-to-make-a-run-on $title $server)
 
+;; redirect run
+
+(register-effect :redirect-run-to-archives)
+(register-effect :redirect-run-to-hq)
+(register-effect :redirect-run-to-rd)
+
 ;; icebreaker strength
 
 (register-effect :give-strength-to-icebreaker-during-run $bonus $title)
 (register-effect :give-strength-to-icebreaker-remainder-of-run $bonus $card-str)
 (register-effect :give-strength-all-icebreakers-during-run $bonus)
 
+;; ice
+
 (register-effect :bypass-ice $title)
 
 (register-effect :prevent-ice-rezzed-during-run)
 (register-effect :prevent-corp-rez-card-during-turn $card-str)
-
+(register-effect :prevent-corp-rez-non-ice-on-runner-turn)
 (register-effect :increase-rez-cost-first-unrezzed-approached-ice $credits)
-(register-effect :redirect-run-to-archives)
-(register-effect :redirect-run-to-hq)
-(register-effect :redirect-run-to-rd)
 
 ;; prevention
 
@@ -248,6 +265,7 @@
 (register-effect :suffer-net-damage $value)
 (register-effect :suffer-brain-damage $value)
 (register-effect :suffer-core-damage $value)
+(register-effect :prevent-damage-until-next-turn)
 
 ;; access
 
@@ -258,6 +276,7 @@
 ;; searching
 
 (register-effect :search-stack-for-connection-resource)
+(register-effect :search-stack-for-run-event)
 (register-effect :search-stack-for-virtual-resource)
 
 ;; Specific card abilities
