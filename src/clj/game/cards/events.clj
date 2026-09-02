@@ -3272,7 +3272,9 @@
 
 (defcard "Populist Rally"
   {:on-play {:req (req (seq (filter #(has-subtype? % "Seedy") (all-active-installed state :runner))))
-             :msg (msg "give the Corp 1 fewer [Click] to spend on [corp-pronoun] next turn")
+             :msg (simple-msg
+                   {:effect/type :reduce-corp-click-next-turn
+                    :effect/count 1})
              :effect (effect (lose state :corp :click-per-turn 1))}
    :events [{:event :corp-turn-ends
              :duration :until-corp-turn-ends

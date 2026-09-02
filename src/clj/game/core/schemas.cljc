@@ -173,6 +173,7 @@
 
 (register-effect :take-additional-turn)
 (register-effect :reduce-corp-max-hand-size-bad-publicity)
+(register-effect :reduce-corp-click-next-turn $count)
 
 ;; rearrange stuff
 

@@ -228,6 +228,7 @@ disable-runner-id = disable {-runner(case:"nominative")} identity
 
 take-additional-turn = take an additional turn after this one
 reduce-corp-max-hand-size-bad-publicity = reduce {-corp(case:"possessive")} maximum hand size by 1 for each {-bad-publicity}
+reduce-corp-click-next-turn = give {-corp(case:"nominative")} {$count} fewer {-click} to spend on [corp-pronoun] next turn
 
 # rearrange stuff
 
