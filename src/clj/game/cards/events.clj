@@ -3077,7 +3077,9 @@
    {:req (req (some #{:hq} (:successful-run runner-reg))
                    (some #{:rd} (:successful-run runner-reg))
                    (some #{:archives} (:successful-run runner-reg)))
-    :msg (msg "add itself to [their] score area as an agenda worth 1 agenda point")
+    :msg (simple-msg
+           {:effect/type :add-self-to-score-area
+            :effect/value 1})
     :effect (effect (as-agenda state :runner card 1))}})
 
 (defcard "Office Supplies"
