@@ -3119,8 +3119,13 @@
 (defcard "Out of the Ashes"
   (let [ashes-run {:prompt "Choose a server"
                    :choices (effect runnable-servers)
+                   :msg (simple-msg
+                          {:effect/type :rfg-to-make-a-run-on
+                           :effect/title card
+                           :effect/server target})
                    :async true
-                   :effect (effect (make-run state side eid target card))}
+                   :effect (effect (move state side card :rfg)
+                             (make-run state side eid target card))}
         ashes-recur (fn ashes-recur []
                       {:optional
                        {:req (req (not (zone-locked? state :runner :discard)))
@@ -3129,15 +3134,13 @@
                                           " available)"))
                         :yes-ability
                         {:async true
-                         :msg "removes Out of the Ashes from the game to make a run"
                          :effect
-                         (effect (move state side card :rfg)
-                              (wait-for (resolve-ability state side (make-eid state eid) ashes-run card nil)
-                                        (if-let [next-out-of-ashes (some #(when (and (= "Out of the Ashes" (:title %))
-                                                                                     (not (same-card? card %))) %)
-                                                                         (:discard runner))]
-                                          (continue-ability state side (ashes-recur) (get-card state next-out-of-ashes) nil)
-                                          (effect-completed state side eid))))}}})]
+                         (effect (wait-for (resolve-ability state side (make-eid state eid) ashes-run card nil)
+                                   (if-let [next-out-of-ashes (some #(when (and (= "Out of the Ashes" (:title %))
+                                                                             (not (same-card? card %))) %)
+                                                                (:discard runner))]
+                                     (continue-ability state side (ashes-recur) (get-card state next-out-of-ashes) nil)
+                                     (effect-completed state side eid))))}}})]
     {:makes-run true
      :on-play (run-any-server-ability)
      :events [{:event :runner-turn-begins

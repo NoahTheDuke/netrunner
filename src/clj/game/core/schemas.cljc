@@ -192,9 +192,15 @@
 (register-effect :derez-card $card-str)
 (register-effect :derez-cards $card-strs)
 
+;; make a run
+
 (register-effect :make-a-run)
 (register-effect :make-a-run-on $server)
 (register-effect :run-on-with-no-rezzed-ice $server)
+(register-effect :rfg-to-make-a-run-on $title $server)
+
+;; icebreaker strength
+
 (register-effect :give-strength-to-icebreaker-during-run $bonus $title)
 (register-effect :give-strength-to-icebreaker-remainder-of-run $bonus $card-str)
 (register-effect :give-strength-all-icebreakers-during-run $bonus)
@@ -209,14 +215,20 @@
 (register-effect :redirect-run-to-hq)
 (register-effect :redirect-run-to-rd)
 
+;; prevention
+
 (register-effect :prevent-core-damage $count)
 (register-effect :prevent-net-damage $count)
 (register-effect :prevent-meat-damage $count)
+
+;; damage
 
 (register-effect :suffer-meat-damage $value)
 (register-effect :suffer-net-damage $value)
 (register-effect :suffer-brain-damage $value)
 (register-effect :suffer-core-damage $value)
+
+;; access
 
 (register-effect :access-another-card)
 (register-effect :access-additional-in-hq $count)

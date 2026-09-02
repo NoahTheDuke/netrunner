@@ -304,11 +304,15 @@ rez-card = rez {$card-str}
 derez-card = derez {$card-str}
 derez-cards = derez {$card-strs}
 
-# Runs
+# make a run
 
 make-a-run = make a run
 make-a-run-on = make a run on {$server}
 run-on-with-no-rezzed-ice = make a run on {$server} during which no ice can be rezzed
+rfg-to-make-a-run-on = remove {$title} from the game to make a run on {$server}
+
+# icebreaker strength
+
 give-strength-to-icebreaker-during-run = give +{$bonus} strength to {$title} during the run
 give-strength-to-icebreaker-remainder-of-run = give +{$bonus} strength to {$card-str} during the run
 give-strength-all-icebreakers-during-run = give +{$bonus} strength to all icebreakers during the run
