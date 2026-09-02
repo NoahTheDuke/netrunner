@@ -3021,7 +3021,10 @@
     :change-in-game-state {:req (req (seq (:deck runner)))}
     :choices (effect (cancellable (filter #(has-subtype? % "Icebreaker") (:deck runner)) :sorted))
     :cancel fail-to-find!
-    :msg (msg "add " (:title target) " from the stack to the grip and shuffle the stack")
+    :msg (simple-msg
+           {:effect/type :add-card-from-stack-to-grip
+            :effect/card-str target}
+           {:effect/type :shuffle-stack})
     :async true
     :effect (effect (trigger-event state side :searched-stack)
                     (continue-ability
@@ -3032,7 +3035,9 @@
                            {:prompt (str "Install " (:title icebreaker) "?")
                             :yes-ability
                             {:async true
-                             :msg (msg " install " (:title icebreaker))
+                             :msg (simple-msg
+                                    {:effect/type :runner-install-card
+                                     :effect/title icebreaker})
                              :effect (effect (runner-install state side (assoc eid :source card :source-type :runner-install) icebreaker nil)
                                           (shuffle! state side :deck))}
                             :no-ability
