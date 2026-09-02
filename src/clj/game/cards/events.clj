@@ -2944,13 +2944,18 @@
   {:on-play
    {:req (req (some #{:hq :rd :archives} (:successful-run runner-reg)))
     :rfg-instead-of-trashing true
-    :msg (msg "force the corp to " (decapitalize target))
     :waiting-prompt true
     :player :corp
     :prompt "Choose one"
     :choices (effect [(when (can-pay? state :corp eid card nil (->c :credit 5))
                      "Pay 5 [Credits]")
                    "Take 1 bad publicity"])
+    :msg (simple-msg
+           (if (= "Pay 5 [Credits]" target)
+             {:effect/type :force-corp-pay-credits
+              :effect/credits 5}
+             {:effect/type :force-take-bad-publicity
+              :effect/count 1}))
     :async true
     :effect (effect (if (= target "Pay 5 [Credits]")
                       (wait-for [{:keys [msg]} (pay state :corp (make-eid state eid) card (->c :credit 5))]

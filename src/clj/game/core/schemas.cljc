@@ -111,8 +111,6 @@
 (register-effect :forfeit $title)
 (register-effect :add-self-to-score-area $value)
 (register-effect :give-bad-publicity $count)
-(register-effect :force-take-bad-publicity $count)
-(register-effect :force-trash-installed-ice $server)
 
 (register-effect :add-card-to-grip $title)
 
@@ -167,11 +165,15 @@
 
 (register-effect :reveal-copies-of-self $count)
 
+;; forcing
+
+(register-effect :force-take-bad-publicity $count)
+(register-effect :force-trash-installed-ice $server)
 (register-effect :force-corp-trash-top-of-rd $count)
 (register-effect :force-corp-trash-additional-top-of-rd $count)
-
 (register-effect :force-corp-rez $title)
 (register-effect :force-corp-trash $title)
+(register-effect :force-corp-pay-credits $credits)
 (register-effect :force-corp-lose-credits $credits)
 
 (register-effect :each-player-draws-cards $count)

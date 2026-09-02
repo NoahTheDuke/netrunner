@@ -263,6 +263,10 @@ reveal-copies-of-self = reveal {$count ->
     *[other] {$count} copies of itself
 }
 
+# forcing
+
+force-take-bad-publicity = force {-corp(case: "nominative")} to take {$count} {-bad-publicity}
+force-trash-installed-ice = force {-corp(case: "nominative")} to trash a {-ice} protecting {$server}
 force-corp-trash-top-of-rd = force the Corp to trash the top {$count ->
     [one] card of R&D
     *[other] {$count} cards of R&D
@@ -274,9 +278,8 @@ force-corp-trash-additional-top-of-rd = force the Corp to trash an additional {$
 force-corp-rez = force the Corp to rez {$title}
 force-corp-trash = force the Corp to trash {$title}
 force-add-all-hq-cards-to-top-of-rd = force {-corp(case: "nominative")} to add all cards in {-hq} to the top of {-rd}
-force-trash-installed-ice = force {-corp(case: "nominative")} to trash a {-ice} protecting {$server}
+force-corp-pay-credits = force {-corp(case: "nominative")} to pay {$credits} {-credit}
 force-corp-lose-credits = force {-corp(case: "nominative")} to lose {$credits} {-credit}
-force-take-bad-publicity = force {-corp(case: "nominative")} to take {$count} {-bad-publicity}
 
 each-player-draws-cards = make each player draw {$count ->
     [one] 1 card
