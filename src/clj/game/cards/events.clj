@@ -3359,8 +3359,9 @@
                           (effect-completed state side eid)
                           (do (update! state side (assoc-in card [:special :maybe-a-bonus-tag] true))
                               (wait-for
-                                (runner-install state side (make-eid state (assoc eid :source card :source-type :runner-install)) target {:msg-keys {:install-source card
-                                                                                                                                                     :display-origin true}})
+                                (runner-install state side (make-eid state (assoc eid :source card :source-type :runner-install))
+                                                target {:msg-keys {:install-source card
+                                                                   :display-origin true}})
                                 (update! state side (dissoc-in card [:special :maybe-a-bonus-tag]))
                                 (effect-completed state side eid)))))}
         install-resource-from-heap
@@ -3384,9 +3385,10 @@
                           (effect-completed state side eid)
                           (do (update! state side (assoc-in card [:special :maybe-a-bonus-tag] true))
                               (wait-for
-                                (runner-install state side (make-eid state (assoc eid :source card :source-type :runner-install)) target {:cost-bonus -2
-                                                                                                                                          :msg-keys {:install-source card
-                                                                                                                                                     :display-origin true}})
+                                (runner-install state side (make-eid state (assoc eid :source card :source-type :runner-install))
+                                                target {:cost-bonus -2
+                                                        :msg-keys {:install-source card
+                                                                   :display-origin true}})
                                 (update! state side (dissoc-in card [:special :maybe-a-bonus-tag]))
                                 (effect-completed state side eid)))))}]
     {:makes-run true
@@ -3396,7 +3398,9 @@
                  :this-card-run true
                  :mandatory true
                  :ability {:async true
-                           :msg "take 1 tag"
+                           :msg (simple-msg
+                                 {:effect/type :take-tags
+                                  :effect/count 1})
                            :effect (effect
                                      (register-pending-event state :runner-gain-tag
                                                              card install-resource-from-heap)
