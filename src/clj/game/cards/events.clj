@@ -3283,7 +3283,9 @@
 (defcard "Power Nap"
   {:on-play
    {:async true
-    :msg (msg "gain " (+ 2 (count (filter #(has-subtype? % "Double") (:discard runner)))) " [Credits]")
+    :msg (simple-msg
+          {:effect/type :gain-credits
+           :effect/count (+ 2 (count (filter #(has-subtype? % "Double") (:discard runner))))})
     :effect (effect (gain-credits state side eid (+ 2 (count (filter #(has-subtype? % "Double")
                                                           (:discard runner))))))}})
 

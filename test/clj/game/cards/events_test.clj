@@ -5675,17 +5675,12 @@
                :runner {:hand [(qty "Power Nap" 3)]}})
     (take-credits state :corp)
     (core/gain state :runner :click 2)
-    (let [credits (:credit (get-runner))]
-      (play-from-hand state :runner "Power Nap")
-      (is (= (+ credits 2) (:credit (get-runner))) "Runner should gain 2"))
-    (let [credits (:credit (get-runner))]
-      (play-from-hand state :runner "Power Nap")
-      (is (= (+ credits 3) (:credit (get-runner)))
-          "Runner should gain 3 for 1 double in heap"))
-    (let [credits (:credit (get-runner))]
-      (play-from-hand state :runner "Power Nap")
-      (is (= (+ credits 4) (:credit (get-runner)))
-          "Runner should gain 4 for 2 doubles in heap"))))
+    (is (changed? [(:credit (get-runner)) 2]
+          (play-from-hand state :runner "Power Nap")))
+    (is (changed? [(:credit (get-runner)) 3]
+          (play-from-hand state :runner "Power Nap")))
+    (is (changed? [(:credit (get-runner)) 4]
+          (play-from-hand state :runner "Power Nap")))))
 
 (deftest power-to-the-people
   ;; Power to the People - Gain 7c the first time you access an agenda
