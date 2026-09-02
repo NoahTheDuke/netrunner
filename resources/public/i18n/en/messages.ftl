@@ -85,6 +85,7 @@ play-card-no-additional-costs = play {$title}, ignoring additional costs
 
 # trashing cards
 
+trash-self = trash itself
 trash-card = trash {$card-str}
 trash-card-at-no-cost = trash {$card-str} at no cost
 trash-n-cards = trash {$count ->
@@ -314,6 +315,10 @@ install-from-grip-with-discount = install {$title} from {-grip}, lowering the co
 install-from-stack = install {$title} from {-stack}
 install-from-stack-with-discount = install {$title} from {-stack}, lowering the cost by {$discount}
 install-program-from-stack = install a {-program} from {-stack}
+
+# hosting
+
+host-self-as-condition-counter = host itself on {$card-str} as a hosted condition counter
 
 # rezzing
 
@@ -599,6 +604,15 @@ card-str-runner-hosted-seen = hosted {$title}
 
 # "hosted facedown card"
 card-str-runner-hosted-unknown = hosted facedown card
+
+# "Merger in the Runner's score area"
+card-str-runner-scored = {$title} in {-runner(case: "possessive")} score area
+
+# "Merger in the Corp's score area"
+card-str-corp-scored = {$title} in {-corp(case: "possessive")} score area
+card-str-corp-rfg = {$title} removed from the game
+card-str-corp-play-area = {$title} in {-corp(case: "possessive")} play area
+card-str-corp-destroyed = destroyed {$title}
 
 # "hosted Ice Wall"
 card-str-corp-hosted-seen = hosted {$title}

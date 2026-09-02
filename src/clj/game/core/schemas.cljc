@@ -84,6 +84,7 @@
 
 ;; trashing
 
+(register-effect :trash-self)
 (register-effect :trash-card $card-str)
 (register-effect :trash-card-at-no-cost $card-str)
 (register-effect :trash-n-cards $count)
@@ -219,6 +220,10 @@
 (register-effect :install-from-stack-with-discount $title $discount)
 (register-effect :install-program-from-stack)
 
+;; hosting
+
+(register-effect :host-self-as-condition-counter $card-str)
+
 ;; rezzing
 
 (register-effect :rez-card $card-str)
@@ -345,6 +350,12 @@
 (register-effect :card-str-runner-unknown)
 (register-effect :card-str-runner-hosted-seen $title)
 (register-effect :card-str-runner-hosted-unknown)
+
+(register-effect :card-str-corp-scored $title)
+(register-effect :card-str-corp-rfg $title)
+(register-effect :card-str-corp-play-area $title)
+(register-effect :card-str-corp-destroyed $title)
+
 (register-effect :card-str-corp-hosted-seen $title)
 (register-effect :card-str-corp-hosted-known $title)
 (register-effect :card-str-corp-hosted-unknown $server $server-n)

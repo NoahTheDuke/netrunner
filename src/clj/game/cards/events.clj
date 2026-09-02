@@ -3250,7 +3250,7 @@
    :events [{:event :purge
              :condition :hosted
              :async true
-             :msg "trash itself"
+             :msg (simple-msg :trash-self)
              :effect (effect (wait-for (trash state :runner card {:cause :purge
                                                                :cause-card card})
                                     (update-all-agenda-points state side)
@@ -3262,7 +3262,9 @@
                :ability
                {:prompt (msg "Choose an agenda to host " (:title card) " on")
                 :choices {:req (req (in-corp-scored? state side target))}
-                :msg (msg "host itself on " (:title target) " as a hosted condition counter")
+                :msg (simple-msg
+                       {:effect/type :host-self-as-condition-counter
+                        :effect/card-str target})
                 :async true
                 :effect (effect (wait-for (install-as-condition-counter state side (make-eid state eid) card target)
                                        (update-all-agenda-points state side)

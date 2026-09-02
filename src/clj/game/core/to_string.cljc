@@ -4,7 +4,7 @@
    [game.core.card :refer [#?(:clj card-index)
                            #?(:clj get-card) corp? get-title
                            ice? installed? rezzed?]]
-   [game.core.servers :refer [is-root? zone->name]]))
+   [game.core.servers :refer [auxiliary->name is-auxilary? is-root? zone->name]]))
 
 #?(:clj (defn card-str
           "Gets a string description of an installed card, reflecting whether it is rezzed,
@@ -24,14 +24,15 @@
                                   installed-ice " protecting "
                                   (is-root? zone) " in the root of "
                                   :else " in ")
-                                ;; TODO add naming of scoring area of corp/runner
                                 (zone->name (or (second zone) zone)) ;; handles [:hand] as well as [:servers :hq]
                                 (when installed-ice
                                   (str " at position " (card-index state card)))))))
                   ;; Runner card messages
-                  (if (or facedown visible)
-                    "a facedown card"
-                    (get-title card)))
+                  (str (if (or facedown visible)
+                         "a facedown card"
+                         (get-title card))
+                    (when (= :scored (first zone))
+                      (str " the Runner's " (auxiliary->name zone)))))
                 (when host (str " hosted on " (card-str state (get-card state host))))))))
 
 (defn remote-num
@@ -52,8 +53,10 @@
                      host :host
                      (and (ice? card) (installed? card)) :ice
                      (is-root? zone) :central
+                     (is-auxilary? zone) :auxiliary
                      :else :remote)
           visibility (cond
+                       (= location :auxiliary) :known
                        (or (rezzed? card) (:seen card) visible) :seen
                        maybe-visible :known
                        :else :unknown)
@@ -66,6 +69,16 @@
           server-n (remote-num zone')
           position (:index card)]
       (case #{location visibility}
+        #{:auxiliary :known}
+        (case (first zone')
+          :scored {:card/str :card-str-corp-scored
+                   :title title}
+          :rfg {:card/str :card-str-corp-rfg
+                :title title}
+          :play-area {:card/str :card-str-corp-play-area
+                      :title title}
+          :destroyed {:card/str :card-str-corp-destroyed
+                      :title title})
         #{:host :seen} {:card/str :card-str-corp-hosted-seen
                         :title title
                         :server server-name
@@ -122,4 +135,6 @@
         seen {:card/str :card-str-runner-seen
               :title (get-title card)}
         host {:card/str :card-str-runner-hosted-unknown}
+        (= :scored (first zone)) {:card/str :card-str-runner-scored
+                                  :title (get-title card)}
         :else {:card/str :card-str-runner-unknown}))))
