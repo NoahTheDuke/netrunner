@@ -3088,7 +3088,12 @@
     :prompt "Choose one"
     :waiting-prompt true
     :choices ["Gain 4 [Credits]" "Draw 4 cards"]
-    :msg (msg (decapitalize target))
+    :msg (simple-msg
+           (if (= target "Gain 4 [Credits]")
+             {:effect/type :gain-credits
+              :effect/count 4}
+             {:effect/type :draw-cards
+              :effect/count 4}))
     :async true
     :effect (effect (if (= target "Gain 4 [Credits]")
                    (gain-credits state :runner eid 4)

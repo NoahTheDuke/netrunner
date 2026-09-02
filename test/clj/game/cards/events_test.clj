@@ -5352,7 +5352,7 @@
               (let [grip (-> (get-runner) :hand count)]
                 (click-prompt state :runner "Draw 4 cards")
                 (is (= (+ 4 grip) (-> (get-runner) :hand count)) "Runner should draw 4 cards"))))]
-    (doall (map office-supplies-test (range 5)))))
+    (run! office-supplies-test (range 5))))
 
 (deftest on-the-lam-vs-tags
     ;; vs tags
