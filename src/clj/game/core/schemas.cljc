@@ -76,13 +76,14 @@
 (register-effect :use-card $username $title $do-ability)
 (register-effect :pay-use-card $username $payment $title $do-ability)
 
+;; trashing
+
 (register-effect :trash-card $card-str)
 (register-effect :trash-card-at-no-cost $card-str)
 (register-effect :trash-n-cards $count)
 (register-effect :trash-cards $count $card-strs)
 (register-effect :trash-accessed-card $title)
 (register-effect :trash-all-cards-in-grip)
-
 (register-effect :trash-all-agendas-by-type)
 (register-effect :trash-all-assets-by-type)
 (register-effect :trash-all-events-by-type)
@@ -92,8 +93,18 @@
 (register-effect :trash-all-resource-by-type)
 (register-effect :trash-all-upgrade-by-type)
 
+;; credits
+
 (register-effect :gain-credits $count)
+(register-effect :corp-gains-credits $count)
+(register-effect :runner-gains-credits $count)
+
+;; drawing cards
+
 (register-effect :draw-cards $count)
+
+;; clicks
+
 (register-effect :gain-clicks $count)
 (register-effect :lose-clicks $count)
 

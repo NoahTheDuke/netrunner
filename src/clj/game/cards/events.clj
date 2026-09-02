@@ -3178,7 +3178,11 @@
 (defcard "Peace in Our Time"
   {:on-play
    {:req (req (not (:scored-agenda corp-reg-last)))
-    :msg "gain 10 [Credits]. The Corp gains 5 [Credits]"
+    :msg (simple-msg
+           {:effect/type :gain-credits
+            :effect/count 10}
+           {:effect/type :corp-gains-credits
+            :effect/count 5})
     :async true
     :effect (effect (wait-for (gain-credits state :runner 10)
                            (register-turn-flag! state side card :can-run nil)

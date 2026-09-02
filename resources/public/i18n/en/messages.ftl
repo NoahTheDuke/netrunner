@@ -77,24 +77,22 @@ join-list = ,{" "}
 
 ## Ability fragments
 
+# trashing cards
+
 trash-card = trash {$card-str}
 trash-card-at-no-cost = trash {$card-str} at no cost
-
 trash-n-cards = trash {$count ->
     [zero] no cards
     [one] 1 card
     *[other] {$count} cards
 }
-
 trash-cards = trash {$count ->
     [zero] no cards
     [one] 1 card ({$card-strs})
     *[other] {$count} cards ({$card-strs})
 }
-
 trash-accessed-card = trash the accessed card ({$title})
 trash-all-cards-in-grip = trash all cards in {-grip}
-
 trash-all-agendas-by-type = trash all {-agenda-plural}
 trash-all-assets-by-type = trash all {-asset-plural}
 trash-all-events-by-type = trash all {-event-plural}
@@ -104,12 +102,20 @@ trash-all-operations-by-type = trash all {-operation-plural}
 trash-all-resource-by-type = trash all {-resource-plural}
 trash-all-upgrade-by-type = trash all {-upgrade-plural}
 
+# credits
+
 gain-credits = gain {$count} {-credit}
+corp-gains-credits = make {-corp(case: "accusative")} gain {$count} {-credit}
+runner-gains-credits = make {-runner(case: "accusative")} gain {$count} {-credit}
+
+# drawing cards
 
 draw-cards = draw {$count ->
     [one] 1 card
     *[other] {$count} cards
 }
+
+# clicks
 
 gain-clicks = gain {$count ->
     [one] [Click]
