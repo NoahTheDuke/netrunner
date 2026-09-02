@@ -3295,7 +3295,9 @@
                             (first-event? state side :access #(agenda? (:accessed-card (first %)))))
              :duration :end-of-turn
              :unregister-once-resolved true
-             :msg "gain 7 [Credits]"
+             :msg (simple-msg
+                   {:effect/type :gain-credits
+                    :effect/count 7})
              :async true
              :effect (effect (gain-credits state side eid 7))}]})
 
