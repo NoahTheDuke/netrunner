@@ -3412,7 +3412,11 @@
 
 (defcard "Process Automation"
   {:on-play
-   {:msg "gain 2 [Credits] and draw 1 card"
+   {:msg (simple-msg
+          {:effect/type :gain-credits
+           :effect/count 2}
+          {:effect/type :draw-cards
+           :effect/count 1})
     :async true
     :effect (effect (wait-for (gain-credits state side 2)
                            (draw state side eid 1)))}})
