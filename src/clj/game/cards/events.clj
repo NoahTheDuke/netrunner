@@ -2823,7 +2823,9 @@
                                           (entrance-trash cards))
                                         card nil))))})]
     {:on-play
-     {:msg "look at and trash or rearrange the top 6 cards of the stack"
+     {:msg (simple-msg
+            {:effect/type :trash-or-rearrange-top-of-stack
+             :effect/count 6})
       :change-in-game-state {:req (req (seq (:deck runner)))}
       :async true
       :waiting-prompt true

@@ -33,6 +33,7 @@
        merge))
 
 (defn load-all-cards []
+  (load-dictionary! "public/i18n")
   (when (empty? @all-cards)
     (->> (load-cards)
          (map (juxt :title identity))
@@ -76,16 +77,14 @@
      (test-var #'game.core.scenarios-test/masterwork-overinstall-boomerang-complex-case-full-game)))
   #_(prof/profile (clojure.test/run-all-tests))
   (prof/serve-ui 8080))
-
 ;;; action-wrapper to better mimic real-world usage
+
 
 (defn do-action
   [command state side args]
   (update-and-send-diffs! main/handle-action {:state state} side command args))
-
 ;; generic test helpers
 
-(load-dictionary! "public/i18n")
 
 (defn is-zone-impl
   "Is the zone exactly equal to a given set of cards?"

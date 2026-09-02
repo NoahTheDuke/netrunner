@@ -214,6 +214,10 @@ rearrange-top-n-cards-rd = rearrange the top {$count ->
     [one] 1 card of {-rd}
     *[other] {$count} cards of {-rd}
 }
+trash-or-rearrange-top-of-stack = look at and trash or rearrange the top {$count ->
+    [one] 1 card of {-stack}
+    *[other] {$count} cards of {-stack}
+}
 
 install-program-from-stack = install a {-program} from {-stack}
 

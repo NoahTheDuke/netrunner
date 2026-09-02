@@ -4956,6 +4956,7 @@
     (is (= "Making an Entrance" (:title (first (:hand (get-runner))))))
     (is (= 1 (count (:hand (get-runner)))))
     (play-from-hand state :runner "Making an Entrance")
+    (print-logs state)
     (is (= 1 (count (:hand (get-runner)))) "Can only play on first click")))
 
 (deftest marathon-trashed-on-unsuccessful-run

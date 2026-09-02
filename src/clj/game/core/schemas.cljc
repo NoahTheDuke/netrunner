@@ -36,6 +36,12 @@
                     (str "expected card, got " (type value)))}
    #'card?])
 
+;; standalone
+(def $username [:username :string])
+(def $do-ability [:do-ability :string])
+(def $payment [:payment :string])
+
+;; :effect
 (def $add-count [:effect/add-count :int])
 (def $bonus [:effect/bonus :int])
 (def $card-str [:effect/card-str card-schema])
@@ -45,8 +51,6 @@
 (def $count [:effect/count :int])
 (def $credits [:effect/credits :int])
 (def $discount [:effect/discount :int])
-(def $do-ability [:do-ability :string])
-(def $payment [:payment :string])
 (def $position [:effect/position :int])
 (def $seen [:effect/seen [:sequential card-schema]])
 (def $server [:effect/server [:or :string :keyword]])
@@ -57,7 +61,6 @@
 (def $turn [:effect/turn :int])
 (def $turns [:effect/turns :int])
 (def $unseen-cnt [:effect/unseen-cnt :int])
-(def $username [:username :string])
 (def $value [:effect/value :int])
 
 (defn map-schema
@@ -147,6 +150,7 @@
 
 (register-effect :rearrange-installed-ice)
 (register-effect :rearrange-top-n-cards-rd $count)
+(register-effect :trash-or-rearrange-top-of-stack $count)
 
 (register-effect :place-n-advancement-counters $count $card-str)
 (register-effect :remove-advancement-counters $count $card-str)
