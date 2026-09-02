@@ -362,15 +362,15 @@
      "wraps `game.macros/effect`, calls `->use-card-msg` with each opts as effect-msg map.
 
      can also be given a keyword, which is wrapped as `{:effect/type opt}`."
-     [& opts]
+     [opt & opts]
      `(game.macros/effect
-       (->use-card-msg ~'card [~@opts]))))
+       (->use-card-msg ~'card [~opt ~@opts]))))
 
 #?(:clj
    (defmacro msg-with-cost
      "wraps `game.macros/effect`, calls `->use-card-msg` with each opts as effect-msg map.
 
      can also be given a keyword, which is wrapped as `{:effect/type opt}`."
-     [& opts]
+     [opt & opts]
      `(game.macros/effect
-       (->use-card-msg ~'card [~@opts] (vals (:cost-paid ~'eid))))))
+       (->use-card-msg ~'card [~opt ~@opts] (vals (:cost-paid ~'eid))))))

@@ -2851,13 +2851,19 @@
                          (unregister-events state side card)))}]})
 
 (defcard "Mars for Martians"
-  (letfn [(count-clan [state] (count (filter #(and (has-subtype? % "Clan") (resource? %))
-                                             (all-active-installed state :runner))))]
+  (letfn [(count-clan [state]
+            (->> (all-active-installed state :runner)
+              (filter #(and (has-subtype? % "Clan") (resource? %)))
+              (count)))]
     {:on-play
-     {:msg (msg "draw " (quantify (count-clan state) "card") " and gain " (count-tags state) " [Credits]")
+     {:msg (simple-msg
+             {:effect/type :draw-cards
+              :effect/count (count-clan state)}
+             {:effect/type :gain-credits
+              :effect/count (count-tags state)})
       :async true
       :effect (effect (wait-for (draw state side (count-clan state))
-                             (gain-credits state side eid (count-tags state))))}}))
+                        (gain-credits state side eid (count-tags state))))}}))
 
 (defcard "Mass Install"
   (letfn [(mhelper [n]
