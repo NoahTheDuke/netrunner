@@ -136,6 +136,7 @@
 (register-effect :expose-card $title)
 (register-effect :reveal-n-cards-in-hq $count)
 (register-effect :reveal-cards-in-hq $count $titles)
+(register-effect :reveal-cards-in-grip $count $titles)
 (register-effect :reveal-top-of-stack $title)
 
 (register-effect :disable-corp-id)
@@ -218,9 +219,17 @@
 (register-effect :access-additional-in-hq $count)
 (register-effect :access-additional-in-rd $count)
 
-(register-effect :trash-all-installed-corp)
+;; searching
 
+(register-effect :search-stack-for-connection-resource)
+(register-effect :search-stack-for-virtual-resource)
+
+;; Specific card abilities
+
+(register-effect :trash-all-installed-corp)
 (register-effect :turn-all-installed-runner-facedown)
+
+;; payments
 
 (register-effect :payment-click $value)
 (register-effect :payment-credit $value)
@@ -274,6 +283,8 @@
 (register-effect :payment-any-agenda-counter $count $title)
 (register-effect :payment-any-virus-counter $count $title)
 (register-effect :payment-derez-harmonic $count $titles)
+
+;; card strs
 
 (register-effect :card-str-runner-seen $title)
 (register-effect :card-str-runner-unknown)

@@ -2888,46 +2888,57 @@
   (letfn [(credit-gain-abi [type]
             {:choices {:max (effect (count (:hand runner)))
                        :card #(and (runner? %)
-                                   (in-hand? %)
-                                   (has-subtype? % type))}
+                                (in-hand? %)
+                                (has-subtype? % type))}
              :prompt (msg "Choose any number of " (decapitalize type) " resources to reveal")
-             :msg (msg "reveal " (enumerate-cards targets :sorted) " from the Grip and gain " (count targets) " [Credits]")
+             :msg (simple-msg
+                    {:effect/type :reveal-cards-in-grip
+                     :effect/count (count targets)
+                     :effect/titles (sort-by get-title targets)}
+                    {:effect/type :gain-credits
+                     :effect/count (count targets)})
              :async true
              :effect (effect (wait-for
-                             (reveal state side targets)
-                             (gain-credits state side eid (* 1 (count targets)))))})
+                               (reveal state side targets)
+                               (gain-credits state side eid (* 1 (count targets)))))})
           (tutor-abi [type]
             {:prompt (str "Choose a " (decapitalize type) " resource")
              :choices (effect (cancellable (filter #(has-subtype? % type)
-                                                (:deck runner)) :sorted))
+                                             (:deck runner)) :sorted))
              :cancel {:async true
-                      :msg "shuffle the stack"
+                      :msg (simple-msg :shuffle-stack)
                       :effect (effect (trigger-event state side :searched-stack)
-                                   (shuffle! state side :deck)
-                                   (continue-ability state side (credit-gain-abi type) card nil))}
-             :msg (msg "add " (:title target) " from the stack to the grip and shuffle the stack")
+                                (shuffle! state side :deck)
+                                (continue-ability state side (credit-gain-abi type) card nil))}
+             :msg (simple-msg
+                    {:effect/type :add-card-from-stack-to-grip
+                     :effect/card-str target}
+                    {:effect/type :shuffle-stack})
              :async true
              :effect (effect (trigger-event state side :searched-stack)
-                             (move state side target :hand)
-                             (shuffle! state side :deck)
-                             (continue-ability state side (credit-gain-abi type) card nil))})]
+                       (move state side target :hand)
+                       (shuffle! state side :deck)
+                       (continue-ability state side (credit-gain-abi type) card nil))})]
     {:on-play {:prompt "Choose one"
                :async true
                :waiting-prompt true
                :choices ["Connection" "Virtual"]
                :effect (effect (let [choice target]
-                              (continue-ability
-                                state side
-                                {:optional
-                                 {:prompt (str "Search the stack for a " (decapitalize choice) " resource?")
-                                  :yes-ability
-                                  {:async true
-                                   :msg (msg "search the stack for a " (decapitalize choice) " resource")
-                                   :effect (effect (continue-ability state side (tutor-abi choice) card nil))}
-                                  :no-ability
-                                  {:async true
-                                   :effect (effect (continue-ability state side (credit-gain-abi choice) card nil))}}}
-                                card nil)))}}))
+                                 (continue-ability
+                                   state side
+                                   {:optional
+                                    {:prompt (str "Search the stack for a " (decapitalize choice) " resource?")
+                                     :yes-ability
+                                     {:async true
+                                      :msg (simple-msg
+                                             (if (= "Connection" choice)
+                                               :search-stack-for-connection-resource
+                                               :search-stack-for-virtual-resource))
+                                      :effect (effect (continue-ability state side (tutor-abi choice) card nil))}
+                                     :no-ability
+                                     {:async true
+                                      :effect (effect (continue-ability state side (credit-gain-abi choice) card nil))}}}
+                                   card nil)))}}))
 
 (defcard "Mining Accident"
   {:on-play

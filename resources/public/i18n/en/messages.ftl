@@ -198,8 +198,18 @@ move-unseen-into-hq = move {$unseen-cnt ->
 }
 
 expose-card = expose {$title}
-reveal-n-cards-in-hq = reveal {$count} cards from {-hq}
-reveal-cards-in-hq = reveal {$count} cards ({$titles}) from {-hq}
+reveal-n-cards-in-hq = reveal {$count ->
+    [one] 1 card from {-hq}
+    *[other] {$count} cards from {-hq}
+}
+reveal-cards-in-hq = reveal {$count ->
+    [one] {$titles} from {-hq}
+    *[other] {$count} cards ({$titles}) from {-hq}
+}
+reveal-cards-in-grip = reveal {$count ->
+    [one] {$titles} from {-grip}
+    *[other] {$count} cards ({$titles}) from {-grip}
+}
 reveal-top-of-stack = reveal {$title} from the top of {-stack}
 
 disable-corp-id = disable {-corp(case:"nominative")} identity
@@ -330,6 +340,9 @@ access-additional-in-rd = access {$count ->
     [one] 1 additional card in {-rd}
     *[other] {$count} additional cards in {-rd}
 }
+
+search-stack-for-connection-resource = search {-stack} for a connection resource
+search-stack-for-virtual-resource = search {-stack} for a virtual resource
 
 ## Specific card abilities
 

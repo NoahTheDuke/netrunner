@@ -5040,11 +5040,10 @@
     (click-prompt state :runner "Virtual")
     (click-prompt state :runner "Yes")
     (click-prompt state :runner "Cookbook")
-    (is (changed? [(:credit (get-runner)) 2]
+    (is (changed? [(:credit (get-runner)) 1]
           (click-card state :runner "Cookbook")
-          (click-card state :runner "Always Be Running")
           (click-prompt state :runner "Done"))
-        "Runner gained 2 credits")
+        "Runner gained 1 credits")
     (is (no-prompt? state :runner))
     ;; Choosing connection
     (play-from-hand state :runner "Meeting of Minds")
