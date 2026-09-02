@@ -4,7 +4,7 @@
    [game.core.card :refer [#?(:clj card-index)
                            #?(:clj get-card) corp? get-title
                            ice? installed? rezzed?]]
-   [game.core.servers :refer [auxiliary->name is-auxilary? is-root? zone->name]]))
+   [game.core.servers :refer [#?(:clj auxiliary->name) is-auxiliary? is-root? zone->name]]))
 
 #?(:clj (defn card-str
           "Gets a string description of an installed card, reflecting whether it is rezzed,
@@ -53,7 +53,7 @@
                      host :host
                      (and (ice? card) (installed? card)) :ice
                      (is-root? zone) :central
-                     (is-auxilary? zone) :auxiliary
+                     (is-auxiliary? zone) :auxiliary
                      :else :remote)
           visibility (cond
                        (= location :auxiliary) :known
@@ -66,6 +66,7 @@
                     (or (second (:zone h)) (:zone h)))
                   (or (second zone) zone))
           server-name (str/lower-case (zone->name zone'))
+          server-name (if (= "r&d" server-name) "rd" server-name)
           server-n (remote-num zone')
           position (:index card)]
       (case #{location visibility}

@@ -3321,14 +3321,18 @@
                        :yes-ability
                        {:async true
                         :cost [(->c :trash-installed (get-strength ice))]
-                        :msg (msg "trash " (card-str state ice))
+                        :msg (simple-msg
+                              {:effect/type :trash-card
+                               :effect/card-str ice})
                         :effect (effect (trash state side eid ice {:cause-card card}))}}}
                      {:optional
                       {:prompt (str "Trash " (:title ice) "?")
                        :once :per-run
                        :yes-ability
                        {:async true
-                        :msg (msg "trash " (card-str state ice))
+                        :msg (simple-msg
+                              {:effect/type :trash-card
+                               :effect/card-str ice})
                         :effect (effect (trash state side eid ice {:cause-card card}))}}}))
                  card nil))}]})
 

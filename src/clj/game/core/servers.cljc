@@ -97,7 +97,7 @@
   (and (is-central? (second zone))
        (= :content (last zone))))
 
-(defn is-auxilary?
+(defn is-auxiliary?
   [zone]
   (some? (auxiliary->name zone)))
 
