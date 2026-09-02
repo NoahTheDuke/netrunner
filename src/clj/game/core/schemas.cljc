@@ -112,6 +112,7 @@
 (register-effect :add-self-to-score-area $value)
 (register-effect :give-bad-publicity $count)
 
+(register-effect :add-self-to-grip)
 (register-effect :add-card-to-grip $title)
 
 (register-effect :add-card-from-stack-to-grip $card-str)

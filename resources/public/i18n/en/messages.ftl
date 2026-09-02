@@ -167,10 +167,10 @@ add-self-to-score-area = add itself to [their] score area as an agenda worth {$v
 
 give-bad-publicity = give {-corp(case: "accusative")} {$count} { -bad-publicity }
 
+add-self-to-grip = add itself to {-grip}
+add-card-to-grip = add {$title} to {-grip}
 
-add-card-to-grip = add {$title} to [their] {-grip}
-
-add-card-from-stack-to-grip = add {$card-str} from {-stack} to [their] {-grip}
+add-card-from-stack-to-grip = add {$card-str} from {-stack} to {-grip}
 add-card-to-top-of-stack = add {$card-str} to the top of {-stack}
 add-card-to-bottom-of-stack = add {$card-str} to the bottom of {-stack}
 

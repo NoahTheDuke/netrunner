@@ -5314,7 +5314,8 @@
       (click-prompt state :runner "No")
       (is (= credits (:credit (get-runner))) "Runner should spend 1 on Networking ability")
       (is (= 1 (count (:discard (get-runner)))) "Runner's discard should be empty")
-      (is (= "Networking" (-> (get-runner) :discard first :title)) "Networking should be in heap"))))
+      (is (= "Networking" (-> (get-runner) :discard first :title)) "Networking should be in heap"))
+    (print-logs state)))
 
 (deftest notoriety
   ;; Notoriety - Run all 3 central servers successfully and play to gain 1 agenda point

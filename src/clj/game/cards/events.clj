@@ -3055,9 +3055,11 @@
 (defcard "Networking"
   {:on-play
    {:async true
-    :msg (msg (if tagged
-                "remove 1 tag"
-                "do nothing"))
+    :msg (simple-msg
+           (if tagged
+             {:effect/type :remove-tags
+              :effect/count 1}
+             :do-nothing))
     :effect (effect (wait-for (lose-tags state side 1)
                            (continue-ability
                              state side
@@ -3066,7 +3068,7 @@
                                :req (req (can-pay? state side eid card nil [(->c :credit 1)]))
                                :yes-ability
                                {:cost [(->c :credit 1)]
-                                :msg "add itself to the Grip"
+                                :msg (simple-msg :add-self-to-grip)
                                 :effect (effect (move state side card :hand))}}}
                              card nil)))}})
 
