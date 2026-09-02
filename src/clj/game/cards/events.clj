@@ -3006,10 +3006,14 @@
 (defcard "Moshing"
   {:on-play
    {:additional-cost [(->c :trash-from-hand 3)]
-    :msg "draw 3 cards and gain 3 [Credits]"
+    :msg (simple-msg
+           {:effect/type :draw-cards
+            :effect/count 3}
+           {:effect/type :gain-credits
+            :effect/count 3})
     :async true
     :effect (effect (wait-for (draw state side 3)
-                           (gain-credits state side eid 3)))}})
+                      (gain-credits state side eid 3)))}})
 
 (defcard "Mutual Favor"
   {:on-play
