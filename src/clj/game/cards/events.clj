@@ -3510,7 +3510,9 @@
                    (some #{:archives} (:successful-run runner-reg)))
     :change-in-game-state {:req (req (some (complement ice?) (all-installed state :corp)))}
     :choices {:card installed?}
-    :msg (msg "access " (:title target))
+    :msg (simple-msg
+          {:effect/type :access-card
+           :effect/card-str target})
     :async true
     :effect (effect (access-card state side eid target))}})
 

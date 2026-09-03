@@ -276,6 +276,7 @@
 ;; access
 
 (register-effect :access-another-card)
+(register-effect :access-card $card-str)
 (register-effect :access-additional-in-hq $count)
 (register-effect :access-additional-in-rd $count)
 

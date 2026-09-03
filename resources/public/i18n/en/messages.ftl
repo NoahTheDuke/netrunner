@@ -368,6 +368,7 @@ prevent-damage-until-next-turn = prevent all damage until your next turn
 # Access
 
 access-another-card = access another card
+access-card = access {$card-str}
 access-additional-in-hq = access {$count ->
     [one] 1 additional card in {-hq}
     *[other] {$count} additional cards in {-hq}
