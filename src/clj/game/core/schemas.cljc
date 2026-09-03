@@ -139,26 +139,26 @@
 (register-effect :add-self-to-score-area $value)
 (register-effect :give-bad-publicity $count)
 
+;; moving cards
+
 (register-effect :add-self-to-grip)
 (register-effect :add-card-to-grip $title)
 (register-effect :add-card-to-hq $card-str)
-
 (register-effect :add-card-from-stack-to-grip $card-str)
 (register-effect :add-card-to-top-of-stack $card-str)
 (register-effect :add-card-to-bottom-of-stack $card-str)
-
 (register-effect :add-card-to-top-of-rd $title)
 (register-effect :add-card-to-bottom-of-rd $title)
-
+(register-effect :add-cards-from-heap-to-grip $card-strs)
 (register-effect :force-add-all-hq-cards-to-top-of-rd)
-
 (register-effect :move-seen-unseen-into-grip $seen $unseen-cnt)
 (register-effect :move-seen-into-grip $seen)
 (register-effect :move-unseen-into-grip $unseen-cnt)
-
 (register-effect :move-seen-unseen-into-hq $seen $unseen-cnt)
 (register-effect :move-seen-into-hq $seen)
 (register-effect :move-unseen-into-hq $unseen-cnt)
+
+;; reveal
 
 (register-effect :expose-card $title)
 (register-effect :reveal-n-cards-in-hq $count)

@@ -6546,7 +6546,8 @@
       (is (= "Easy Mark" (-> (get-runner) :hand first :title)))
       (is (no-prompt? state :corp) "Corp should have no more prompts")
       (is (no-prompt? state :runner) "Runner should have no more prompts")
-      (is (nil? (get-run)) "Run is ended")))
+      (is (nil? (get-run)) "Run is ended")
+      (is (second-last-log-contains? state #"uses Rip Deal to add Easy Mark from the heap to the grip"))))
 
 (deftest rip-deal-with-gauntlet-2942
     ;; with Gauntlet #2942

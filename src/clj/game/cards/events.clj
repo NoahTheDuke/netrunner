@@ -3787,12 +3787,13 @@
                             :show-discard true
                             :prompt (str "Choose " (quantify cards-to-move "card")
                                          " to add from the heap to the grip")
-                            :msg (msg "add " (enumerate-cards targets :sorted)
-                                      " from the heap to the grip")
                             :choices {:max cards-to-move
                                       :all true
                                       :card #(and (runner? %)
                                                   (in-discard? %))}
+                            :msg (simple-msg
+                                  {:effect/type :add-cards-from-heap-to-grip
+                                   :effect/card-strs (sort-by get-title targets)})
                             :effect (effect (doseq [c targets]
                                            (move state side c :hand))
                                          (swap! state assoc-in [:run :prevent-hand-access] true)

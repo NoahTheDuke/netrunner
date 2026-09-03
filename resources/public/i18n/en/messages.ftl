@@ -176,6 +176,8 @@ add-self-to-score-area = add itself to [their] score area as an agenda worth {$v
 
 give-bad-publicity = give {-corp(case: "accusative")} {$count} { -bad-publicity }
 
+# moving cards
+
 add-self-to-grip = add itself to {-grip}
 add-card-to-grip = add {$title} to {-grip}
 add-card-to-hq = add {$card-str} to {-hq}
@@ -186,6 +188,8 @@ add-card-to-bottom-of-stack = add {$card-str} to the bottom of {-stack}
 
 add-card-to-top-of-rd = add {$title} to the top of {-rd}
 add-card-to-bottom-of-rd = add {$title} to the bottom of {-rd}
+
+add-cards-from-heap-to-grip = add {$card-strs} from {-heap} to {-grip}
 
 move-seen-unseen-into-grip = move {$seen} and {$unseen-cnt ->
     [one] 1 unseen card into {-grip}
@@ -206,6 +210,8 @@ move-unseen-into-hq = move {$unseen-cnt ->
     [one] 1 unseen card into {-hq}
     *[other] {$unseen-cnt} unseen cards into {-hq}
 }
+
+# reveal
 
 expose-card = expose {$title}
 reveal-n-cards-in-hq = reveal {$count ->

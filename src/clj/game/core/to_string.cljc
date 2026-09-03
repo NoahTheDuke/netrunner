@@ -3,8 +3,9 @@
    [clojure.string :as str]
    [game.core.card :refer [#?(:clj card-index)
                            #?(:clj get-card) corp? get-title
-                           ice? installed? rezzed?]]
-   [game.core.servers :refer [#?(:clj auxiliary->name) is-auxiliary? is-root? zone->name]]))
+                           ice? in-discard? installed? rezzed?]]
+   [game.core.servers :refer [#?(:clj auxiliary->name)
+                              is-auxiliary? is-root? zone->name]]))
 
 #?(:clj (defn card-str
           "Gets a string description of an installed card, reflecting whether it is rezzed,
@@ -129,13 +130,14 @@
                           :server-n server-n
                           :position position}))
     ;; Runner card messages
-    (let [seen (or facedown visible)]
+    (let [title (get-title card)
+          seen (or facedown visible (in-discard? card))]
       (cond
         (and host seen) {:card/str :card-str-runner-hosted-seen
-                         :title (get-title card)}
+                         :title title}
         seen {:card/str :card-str-runner-seen
-              :title (get-title card)}
+              :title title}
         host {:card/str :card-str-runner-hosted-unknown}
         (= :scored (first zone)) {:card/str :card-str-runner-scored
-                                  :title (get-title card)}
+                                  :title title}
         :else {:card/str :card-str-runner-unknown}))))
