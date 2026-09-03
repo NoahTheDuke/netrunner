@@ -10,9 +10,9 @@
    [game.core.card :refer [agenda? asset? card-index condition-counter? corp?
                            event? facedown? faceup? get-card get-counters
                            get-nested-host get-title get-zone hardware?
-                           has-subtype? ice? in-discard? in-hand? installed?
-                           is-type? operation? program? resource? rezzed?
-                           runner? upgrade?]]
+                           has-subtype? ice? identity? in-discard? in-hand?
+                           installed? is-type? operation? program? resource?
+                           rezzed? runner? same-faction? upgrade?]]
    [game.core.charge :refer [can-charge charge-ability charge-card]]
    [game.core.checkpoint :refer [fake-checkpoint]]
    [game.core.choose-one :refer [choose-one-helper cost-option]]
@@ -3547,19 +3547,20 @@
   {:on-play
    {:prompt "Choose an identity"
     :rfg-instead-of-trashing true
-    :choices (effect (let [is-draft-id? #(.startsWith (:code %) "00")
+    :choices (effect (let [is-draft-id? #(str/starts-with? (:code %) "00")
                         runner-identity (:identity runner)
                         format (:format @state)
-                        is-swappable #(and (= "Identity" (:type %))
-                                           (= "Runner" (:side %))
-                                           (= (:faction runner-identity) (:faction %))
+                        is-swappable #(and (identity? %)
+                                           (runner? %)
+                                           (same-faction? runner-identity %)
                                            (not (is-draft-id? %))
-                                           (not= (:title runner-identity) (:title %))
-                                           (or (#{:casual :quick-draft :preconstructed} format)
-                                               (legal? format :legal %)))
+                                           (not= (get-title runner-identity) (get-title %))
+                                           (legal? format :legal %))
                         swappable-ids (filter is-swappable (server-cards))]
                     (sort-by :title swappable-ids)))
-    :msg "change identities"
+    :msg (simple-msg
+          {:effect/type :change-identity
+           :effect/title (assoc target :cid -1)})
     :effect (effect (let [old-runner-identity (:identity runner)]
                    ;; Handle hosted cards (Ayla) - Part 1
                    (doseq [c (:hosted old-runner-identity)]

@@ -70,7 +70,7 @@
 (def effect-registry (atom {}))
 (defn register-effect
   [kw & kvs]
-  (swap! effect-registry assoc kw (apply map-schema kvs))
+  (swap! effect-registry assoc kw (m/validator (apply map-schema kvs)))
   kw)
 
 (register-effect :use-card $username $title $do-ability)
@@ -290,6 +290,7 @@
 
 (register-effect :trash-all-installed-corp)
 (register-effect :turn-all-installed-runner-facedown)
+(register-effect :change-identity $title)
 
 ;; payments
 
@@ -371,13 +372,17 @@
 (register-effect :card-str-corp-installed-ice-known $title $server $position $server-n)
 (register-effect :card-str-corp-installed-ice-unknown $server $position $server-n)
 
+(defn validate-effect [e]
+  (if-let [validator (@effect-registry (:effect/type e))]
+    (validator e)
+    false))
+
 (def EffectMsg
-  (m/schema
-    `[:multi {:dispatch :effect/type}
-     ~@@effect-registry]))
+  (m/schema [:fn validate-effect]))
 
 (comment
-  (m/validate EffectMsg {:effect/type :trash-all-cards-in-grip :effect/count 1})
+  (m/validate EffectMsg {:effect/type :trash-all-cards-in-grip
+                         :effect/count 1})
   ,)
 
 (def Msg
@@ -391,7 +396,7 @@
 (def msg-registry (atom {}))
 (defn register-msg
   [kw & kvs]
-  (swap! msg-registry assoc kw (mu/merge Msg (apply map-schema kvs)))
+  (swap! msg-registry assoc kw (m/validator (mu/merge Msg (apply map-schema kvs))))
   kw)
 
 (register-msg :increase-trace-strength $username $payment $value)
@@ -428,7 +433,10 @@
 (register-msg :msg-derez-card $username $card-str)
 (register-msg :msg-rfg-n-cards-from-stack $username $count $card-strs)
 
+(defn validate-msg [m]
+  (if-let [validator (@msg-registry (:msg/type m))]
+    (validator m)
+    false))
+
 (def MsgMap
-  (m/schema
-    `[:multi {:dispatch :msg/type}
-     ~@@msg-registry]))
+  (m/schema [:fn validate-msg]))

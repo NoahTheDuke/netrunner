@@ -390,6 +390,10 @@ trash-all-installed-corp = trash all installed { -corp(case: "genitive") } cards
 # Apocalypse
 turn-all-installed-runner-facedown = turn all installed { -runner(case: "genitive") } cards facedown
 
+# Rebirth
+
+change-identity = change identity to {$title}
+
 ## Payments 
 
 payment-click = spends {$value} {-click}
