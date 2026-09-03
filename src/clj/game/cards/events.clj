@@ -3817,7 +3817,9 @@
   {:on-play {:async true
              :change-in-game-state (effect (and (seq (:deck runner))
                                              (pos? (get-in @state [:runner :click] 0))))
-             :msg (msg "draw " (quantify (get-in @state [:runner :click]) "card"))
+             :msg (simple-msg
+                   {:effect/type :draw-cards
+                    :effect/count (get-in @state [:runner :click])})
              :effect (effect (draw state side eid (get-in @state [:runner :click] 0)))}})
 
 (defcard "Rumor Mill"
@@ -3860,11 +3862,11 @@
 
 (defcard "Running Hot"
   {:on-play
-   {:msg "gain [Click][Click][Click]"
+   {:msg (simple-msg
+          {:effect/type :gain-clicks
+           :effect/count 3})
     :additional-cost [(->c :brain 1)]
-    :async true
-    :effect (effect (gain-clicks state side 3)
-                    (effect-completed state side eid))}})
+    :effect (effect (gain-clicks state side 3))}})
 
 (defcard "Running Interference"
   {:makes-run true
@@ -3880,7 +3882,9 @@
              :automatic :bypass
              :req (req (first-run-event? state side :encounter-ice))
              :once :per-run
-             :msg (msg "bypass " (card-str state current-ice))
+             :msg (simple-msg
+                   {:effect/type :bypass-ice
+                    :effect/title current-ice})
              :effect (effect (bypass-ice state))}
             {:event :encounter-ice
              :skippable true
@@ -3892,7 +3896,9 @@
                                                         (card-str state current-ice)
                                                         "?")
                                            :waiting-prompt true
-                                           :yes-ability {:msg (msg "bypass " (card-str state current-ice))
+                                                      :yes-ability {:msg (simple-msg
+                                                                          {:effect/type :bypass-ice
+                                                                           :effect/title current-ice})
                                                          :cost [(->c :click 1)]
                                                          :effect (effect (bypass-ice state))}}}
                                card nil))}]})
