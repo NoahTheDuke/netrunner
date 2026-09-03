@@ -3484,7 +3484,12 @@
                   {:choices {:card #(and (is-remote? (second (get-zone %)))
                                          (= (last (get-zone %)) :content)
                                          (not (:rezzed %)))}
-                   :msg (msg "place " (quantify c "advancement counter") " on " (card-str state target) " and gain " (* 2 c) " [Credits]")
+                   :msg (simple-msg
+                         {:effect/type :place-n-advancement-counters
+                          :effect/count c
+                          :effect/card-str target}
+                         {:effect/type :gain-credits
+                          :effect/count (* c 2)})
                    :async true
                    :effect (effect (wait-for
                                   (gain-credits state side (* 2 c))

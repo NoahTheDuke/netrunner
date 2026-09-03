@@ -5990,12 +5990,12 @@
       (is (core/can-access? state :runner other-pad)) "Not prevented from accessing other cards")
     (take-credits state :runner)
     (take-credits state :corp)
-    (let [pad (get-content state :remote1 0)
-          runner-creds (:credit (get-runner))]
-      (run-empty-server state "Server 1")
-      (is (core/can-access? state :runner (refresh pad)) "Can access PAD Campgain next turn")
-      (click-prompt state :runner "Pay 4 [Credits] to trash")
-      (is (= (- runner-creds 4) (:credit (get-runner))) "Paid 4 credits to trash PAD Campaign"))))
+    (is (changed? [(:credit (get-runner)) -4]
+          (run-empty-server state "Server 1")
+          (is (core/can-access? state :runner (get-content state :remote1 0))
+              "Can access PAD Campgain next turn")
+          (click-prompt state :runner "Pay 4 [Credits] to trash"))
+        "Paid 4 credits to trash PAD Campaign")))
 
 (deftest quest-completed
   ;; Quest Completed
