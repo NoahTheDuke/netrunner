@@ -67,6 +67,7 @@ server-name = {$server ->
 
 use-card = {$username} uses {$title} to {$do-ability}.
 pay-use-card = {$username} {$payment} to use {$title} to {$do-ability}.
+satisfy-card = {$username} {$payment} to satisfy {$title}.
 
 # join ability framents together naturally
 # for example, "$player uses $card to do x and do y and do z" will use [join-with-and]
@@ -189,7 +190,7 @@ add-card-to-bottom-of-stack = add {$card-str} to the bottom of {-stack}
 add-card-to-top-of-rd = add {$title} to the top of {-rd}
 add-card-to-bottom-of-rd = add {$title} to the bottom of {-rd}
 
-add-cards-from-heap-to-grip = add {$card-strs} from {-heap} to {-grip}
+add-cards-from-heap-to-grip = add {$titles} from {-heap} to {-grip}
 
 move-seen-unseen-into-grip = move {$seen} and {$unseen-cnt ->
     [one] 1 unseen card into {-grip}
@@ -360,6 +361,7 @@ give-strength-all-icebreakers-during-run = give +{$bonus} strength to all icebre
 
 bypass-ice = bypass {$title}
 
+prevent-run-ending = prevent the run from ending
 prevent-ice-rezzed-during-run = prevent {-ice-type} from being rezzed during the run
 prevent-corp-rez-card-during-turn = prevent {-corp(case:"nominative")} from rezzing {$card-str} for the rest of the turn
 prevent-corp-rez-non-ice-on-runner-turn = prevent {-corp(case:"nominative")} from rezzing non-ice cards during {-runner(case:"possessive")} turn

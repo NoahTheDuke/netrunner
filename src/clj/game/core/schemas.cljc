@@ -256,6 +256,7 @@
 
 (register-effect :bypass-ice $title)
 
+(register-effect :prevent-run-ending)
 (register-effect :prevent-ice-rezzed-during-run)
 (register-effect :prevent-corp-rez-card-during-turn $card-str)
 (register-effect :prevent-corp-rez-non-ice-on-runner-turn)

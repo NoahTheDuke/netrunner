@@ -1,27 +1,34 @@
 (ns game.core.engine
   (:require
-    [clj-uuid :as uuid]
-    [clojure.string :as string]
-    [com.noahbogart.cond-plus :refer [cond+]]
-    [game.core.board :refer [clear-empty-remotes get-all-cards all-installed all-installed-runner
-                             all-installed-runner-type all-active-installed]]
-    [game.core.card :refer [active? facedown? faceup? get-card get-cid get-title ice? in-discard? in-hand? in-rfg? in-set-aside? installed? rezzed? program? console? unique?]]
-    [game.core.card-defs :refer [card-def]]
-    [game.core.effects :refer [get-effect-maps unregister-lingering-effects is-disabled? is-disabled-reg? update-disabled-cards]]
-    [game.core.eid :refer [complete-with-result effect-completed make-eid]]
-    [game.core.finding :refer [find-cid]]
-    [game.core.payment :refer [build-spend-msg can-pay? handler]]
-    [game.core.prompt-state :refer [add-to-prompt-queue]]
-    [game.core.prompts :refer [clear-wait-prompt show-prompt show-select show-wait-prompt]]
-    [game.core.say :refer [system-msg multi-msg system-say n-last-logs]]
-    [game.core.update :refer [update!]]
-    [game.core.winning :refer [check-win-by-agenda]]
-    [game.macros :refer [continue-ability effect wait-for]]
-    [game.utils :refer [dissoc-in distinct-by enumerate-str in-coll? remove-once same-card? server-cards side-str to-keyword]]
-    [jinteki.utils :refer [other-side]]
-    [game.core.memory :refer [update-mu]]
-    [game.core.to-string :refer [card-str]]
-    [taoensso.timbre :as timbre]))
+   [clj-uuid :as uuid]
+   [clojure.string :as string]
+   [com.noahbogart.cond-plus :refer [cond+]]
+   [game.core.board :refer [all-active-installed all-installed
+                            all-installed-runner-type clear-empty-remotes]]
+   [game.core.card :refer [active? console? facedown? faceup? get-card get-cid
+                           get-title in-discard? in-hand? in-rfg?
+                           in-set-aside? installed? program? rezzed? unique?]]
+   [game.core.card-defs :refer [card-def]]
+   [game.core.effects :refer [get-effect-maps is-disabled-reg? is-disabled?
+                              unregister-lingering-effects
+                              update-disabled-cards]]
+   [game.core.eid :refer [complete-with-result effect-completed make-eid]]
+   [game.core.finding :refer [find-cid]]
+   [game.core.memory :refer [update-mu]]
+   [game.core.payment :refer [build-spend-msg can-pay? handler]]
+   [game.core.prompt-state :refer [add-to-prompt-queue]]
+   [game.core.prompts :refer [clear-wait-prompt show-prompt show-select
+                              show-wait-prompt]]
+   [game.core.say :refer [multi-msg n-last-logs system-msg system-say]]
+   [game.core.to-string :refer [card-str]]
+   [game.core.update :refer [update!]]
+   [game.core.winning :refer [check-win-by-agenda]]
+   [game.macros :refer [continue-ability effect wait-for]]
+   [game.utils :refer [dissoc-in distinct-by enumerate-str in-coll?
+                       remove-once same-card? server-cards side-str to-keyword]]
+   [jinteki.i18n :refer [->effect-msg simple-msg]]
+   [jinteki.utils :refer [other-side]]
+   [taoensso.timbre :as timbre]))
 
 ;; resolve-ability docs
 
@@ -305,12 +312,14 @@
   [state side {:keys [eid] :as ability} card targets payment-str]
   (when-let [message (:msg ability)]
     (let [side (or (:player ability) side)
-          desc (if (or (= :cost message) (string? message))
-                 message
-                 (message state side eid card targets))]
+          desc (cond
+                 (string? message) message
+                 (= :cost message) (->effect-msg {:msg/type :satisfy-card
+                                                  :msg/payments (vals (:cost-paid eid))
+                                                  :title (get-title card)})
+                 :else (message state side eid card targets))]
       (cond
         (map? desc) (assoc desc :side side)
-        (= :cost desc) (str payment-str " to satisfy " (get-title card))
         desc (str (build-spend-msg payment-str "use")
                   (get-title card) " to " desc)))))
 
@@ -335,14 +344,14 @@
   ([state side eid ability card] (do-nothing state side eid ability card nil))
   ([state side eid ability card payment-str]
    (when-not (get-in ability [:change-in-game-state :silent])
-     (print-msg state side (assoc ability :msg "do nothing") card [] payment-str))
+     (print-msg state side (assoc ability :msg (simple-msg :do-nothing)) card [] payment-str))
    (effect-completed state side eid)))
 
 (defn- change-in-game-state?
   "Concession for NCIGS going - uses a 'change-in-game-state' key to check when a card
   has no potential to do anything through resolving (different to req)"
   [state side {:keys [eid] :as ability} card targets]
-  (or (= nil (get-in ability [:change-in-game-state :req]))
+  (or (nil? (get-in ability [:change-in-game-state :req]))
       ((get-in ability [:change-in-game-state :req]) state side eid card targets)))
 
 (defn- do-effect

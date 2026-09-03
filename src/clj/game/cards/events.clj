@@ -3793,7 +3793,7 @@
                                                   (in-discard? %))}
                             :msg (simple-msg
                                   {:effect/type :add-cards-from-heap-to-grip
-                                   :effect/card-strs (sort-by get-title targets)})
+                                   :effect/titles (sort-by get-title targets)})
                             :effect (effect (doseq [c targets]
                                            (move state side c :hand))
                                          (swap! state assoc-in [:run :prevent-hand-access] true)
@@ -4030,7 +4030,7 @@
                                                                {:option "The run does not end"
                                                                 :ability {:display-side :runner
                                                                           :async true
-                                                                          :msg "prevent the run from ending"
+                                                                          :msg (simple-msg :prevent-run-ending)
                                                                           :effect (effect (prevent-end-run state side eid))}}]))
                                                           card nil)))}}}]})
 

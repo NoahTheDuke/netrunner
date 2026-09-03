@@ -6986,11 +6986,12 @@
       (run-continue state :encounter-ice)
       (card-subroutine state :corp (get-ice state :remote1 0) 0)
       (click-prompt state :corp opt)
-      (if (= opt "The run does not end")
-        (do (is (no-prompt? state :runner) "no prompt")
+      (if (= opt "The run does not end") (do (is (no-prompt? state :runner) "no prompt")
             (is (no-prompt? state :corp) "no prompt")
+            (is (last-log-contains? state #"uses Shred to prevent the run from ending"))
             (is (:run @state) "still run"))
-        (is (not (:run @state)) "not run")))))
+        (do (is (last-log-contains? state #"reveals and trashes 3 random cards .* from HQ to satisfy Shred"))
+            (is (not (:run @state)) "not run"))))))
 
 (deftest singularity
   ;; Singularity - Run a remote; if successful, trash all contents at no cost

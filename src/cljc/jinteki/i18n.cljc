@@ -322,11 +322,12 @@
     [{:payment/type (if (= :corp side)
                       "payment-trash-from-hq"
                       "payment-trash-from-grip")
-      :payment/count (count targets)
-      :payment/titles (mapv get-title targets)}]
+      :payment/value (count targets)
+      :payment/titles (when-let [t (not-empty targets)] (mapv get-title t))}]
     #_ :else
     [{:payment/type (str "payment-" (name type))
       :payment/value value
+      :payment/count value
       :payment/title (get-title (first targets))
       :payment/titles (when-let [t (not-empty targets)] (mapv get-title t))}]))
 
