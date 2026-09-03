@@ -6031,7 +6031,7 @@
       (is (zero? (count (:hand (get-runner)))) "hand wiped by komainu")
       (run-continue state)
       (is (changed? [(:credit (get-runner)) +3
-             (count (:hand (get-runner))) +5]
+                     (count (:hand (get-runner))) +5]
             (run-continue state))
           "gained 3 credits from raindrop"))))
 

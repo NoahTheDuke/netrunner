@@ -3530,9 +3530,12 @@
              :effect (effect (let [cards-to-draw (get-counters (get-card state card) :power)]
                             (continue-ability
                               state side
-                              {:msg (msg (if (pos? cards-to-draw)
-                                           (str "draw " (quantify cards-to-draw "card") " and gain 3 [Credits]")
-                                           "gain 3 [Credits]"))
+                              {:msg (simple-msg
+                                     (when (pos? cards-to-draw)
+                                       {:effect/type :draw-cards
+                                        :effect/count cards-to-draw})
+                                     {:effect/type :gain-credits
+                                      :effect/count 3})
                                :async true
                                :effect (effect (if (pos? cards-to-draw)
                                               (wait-for (draw state side cards-to-draw)
