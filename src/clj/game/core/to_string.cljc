@@ -2,8 +2,10 @@
   (:require
    [clojure.string :as str]
    [game.core.card :refer [#?(:clj card-index)
-                           #?(:clj get-card) corp? get-title
-                           ice? in-discard? installed? rezzed?]]
+                           #?(:clj get-card)
+                           condition-counter? corp? get-title ice? in-current?
+                           in-discard? in-hand? in-play-area? in-scored?
+                           installed? rezzed?]]
    [game.core.servers :refer [#?(:clj auxiliary->name)
                               is-auxiliary? is-root? zone->name]]))
 
@@ -29,7 +31,7 @@
                                 (when installed-ice
                                   (str " at position " (card-index state card)))))))
                   ;; Runner card messages
-                  (str (if (or facedown visible)
+                  (str (if (or facedown (not visible))
                          "a facedown card"
                          (get-title card))
                     (when (= :scored (first zone))
@@ -131,13 +133,27 @@
                           :position position}))
     ;; Runner card messages
     (let [title (get-title card)
-          seen (or facedown visible (in-discard? card))]
+          installed?' (installed? card)
+          discard?' (in-discard? card)
+          visible (or (not facedown)
+                      installed?'
+                      discard?'
+                      (in-current? card)
+                      (in-play-area? card)
+                      (condition-counter? card))]
       (cond
-        (and host seen) {:card/str :card-str-runner-hosted-seen
+        (in-scored? card) {:card/str :card-str-runner-scored
+                           :title title}
+        (in-hand? card) {:card/str :card-str-runner-grip
                          :title title}
-        seen {:card/str :card-str-runner-seen
-              :title title}
+        discard?' {:card/str :card-str-runner-discard
+                   :title title}
+        (and host visible) {:card/str :card-str-runner-hosted-seen
+                            :title title}
         host {:card/str :card-str-runner-hosted-unknown}
-        (= :scored (first zone)) {:card/str :card-str-runner-scored
-                                  :title title}
+        visible (if installed?'
+                  {:card/str :card-str-runner-installed-seen
+                   :title title}
+                  {:card/str :card-str-runner-seen
+                   :title title})
         :else {:card/str :card-str-runner-unknown}))))

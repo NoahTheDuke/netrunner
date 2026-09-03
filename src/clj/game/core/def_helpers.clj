@@ -676,4 +676,5 @@
              (let [ability# (->> ~@(reverse (cons body more))
                                  (add-default-abilities ~title))]
                (swap! card-defs-cache assoc ~title ability#)
-               ability#)))))
+               ability#)))
+       ~title))

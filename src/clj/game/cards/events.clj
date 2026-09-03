@@ -3942,9 +3942,12 @@
                                             (and (in-discard? target)
                                                  (not (zone-locked? state :runner :discard))))
                                         (runner-can-pay-and-install? state side (assoc eid :source card) target {:cost-bonus (- tcost)}))}
-                        :msg (msg "trash " (:title trashed)
-                                  " and install " (:title target)
-                                  ", lowering the cost by " tcost " [Credits]")
+                        :msg (simple-msg
+                              {:effect/type :trash-card
+                               :effect/card-str trashed}
+                              {:effect/type :install-with-discount
+                               :effect/title target
+                               :effect/discount tcost})
                         :effect (effect (runner-install state side (assoc eid :source card :source-type :runner-install)
                                                         target {:cost-bonus (- tcost)}))}
                        card nil))))}})

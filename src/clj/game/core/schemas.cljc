@@ -215,6 +215,7 @@
 
 (register-effect :runner-install-card $title)
 
+(register-effect :install-with-discount $title $discount)
 (register-effect :install-from-grip $title)
 (register-effect :install-from-grip-with-discount $title $discount)
 

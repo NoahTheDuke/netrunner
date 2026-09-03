@@ -319,6 +319,7 @@ each-player-draws-cards = make each player draw {$count ->
 
 runner-install-card = install {$title}
 
+install-with-discount = install {$title}, lowering the cost by {$discount} {-credit}
 install-from-grip = install {$title} from {-grip}
 install-from-grip-with-discount = install {$title} from {-grip}, lowering the cost by {$discount}
 
@@ -610,6 +611,15 @@ payment-derez-harmonic = derezzes {$count} Harmonic {-ice-type} ({$titles})
 
 # "Corroder"
 card-str-runner-seen = {$title}
+
+# "installed Corroder"
+card-str-runner-installed-seen = an installed {$title}
+
+# "a card in the grip"
+card-str-runner-grip = a card in {-grip}
+
+# "Corroder in the heap"
+card-str-runner-discard = {$title} in {-heap}
 
 # "a facedown card"
 card-str-runner-unknown = a facedown card
