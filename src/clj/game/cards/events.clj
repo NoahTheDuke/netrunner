@@ -3653,7 +3653,9 @@
       :waiting-prompt true
       :choices {:card #(and (installed? %)
                             (corp? %))}
-      :msg (msg "add " (card-str state target) " to HQ")
+      :msg (simple-msg
+            {:effect/type :add-card-to-hq
+             :effect/card-str target})
       :cancel (opt-run)
       :effect (effect (move state :corp target :hand)
                       (continue-ability state side (opt-run) card nil))}}))

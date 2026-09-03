@@ -178,6 +178,7 @@ give-bad-publicity = give {-corp(case: "accusative")} {$count} { -bad-publicity 
 
 add-self-to-grip = add itself to {-grip}
 add-card-to-grip = add {$title} to {-grip}
+add-card-to-hq = add {$card-str} to {-hq}
 
 add-card-from-stack-to-grip = add {$card-str} from {-stack} to {-grip}
 add-card-to-top-of-stack = add {$card-str} to the top of {-stack}

@@ -32,9 +32,7 @@
 ;; individual keys for use in concrete schemas
 
 (def card-schema
-  [:fn {:error/fn (fn [{:keys [value]} _]
-                    (str "expected card, got " (type value)))}
-   #'card?])
+  [:fn {:error/message "should be a card"} card?])
 
 ;; standalone
 (def $username [:username :string])
@@ -70,7 +68,7 @@
 (def effect-registry (atom {}))
 (defn register-effect
   [kw & kvs]
-  (swap! effect-registry assoc kw (m/validator (apply map-schema kvs)))
+  (swap! effect-registry assoc kw (map-schema kvs))
   kw)
 
 (register-effect :use-card $username $title $do-ability)
@@ -142,6 +140,7 @@
 
 (register-effect :add-self-to-grip)
 (register-effect :add-card-to-grip $title)
+(register-effect :add-card-to-hq $card-str)
 
 (register-effect :add-card-from-stack-to-grip $card-str)
 (register-effect :add-card-to-top-of-stack $card-str)
@@ -372,17 +371,14 @@
 (register-effect :card-str-corp-installed-ice-known $title $server $position $server-n)
 (register-effect :card-str-corp-installed-ice-unknown $server $position $server-n)
 
-(defn validate-effect [e]
-  (if-let [validator (@effect-registry (:effect/type e))]
-    (validator e)
-    false))
-
 (def EffectMsg
-  (m/schema [:fn validate-effect]))
+  (m/schema
+   `[:multi {:dispatch :effect/type}
+     ~@@effect-registry]))
 
 (comment
-  (m/validate EffectMsg {:effect/type :trash-all-cards-in-grip
-                         :effect/count 1})
+  (me/humanize (m/explain EffectMsg {:effect/type :add-card-to-hq
+                                     :effect/title {:title "hello"}}))
   ,)
 
 (def Msg
@@ -396,7 +392,7 @@
 (def msg-registry (atom {}))
 (defn register-msg
   [kw & kvs]
-  (swap! msg-registry assoc kw (m/validator (mu/merge Msg (apply map-schema kvs))))
+  (swap! msg-registry assoc kw (mu/merge Msg (map-schema kvs)))
   kw)
 
 (register-msg :increase-trace-strength $username $payment $value)
@@ -433,10 +429,7 @@
 (register-msg :msg-derez-card $username $card-str)
 (register-msg :msg-rfg-n-cards-from-stack $username $count $card-strs)
 
-(defn validate-msg [m]
-  (if-let [validator (@msg-registry (:msg/type m))]
-    (validator m)
-    false))
-
 (def MsgMap
-  (m/schema [:fn validate-msg]))
+  (m/schema
+   `[:multi {:dispatch :effect/type}
+     ~@@msg-registry]))
