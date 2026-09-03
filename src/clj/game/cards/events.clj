@@ -3758,9 +3758,12 @@
                          {:prompt (str "Charge " (:title rig-target) "?")
                           :req (req (can-charge state side rig-target))
                           :yes-ability
-                          {:async true
-                           :effect (effect (charge-card state side eid rig-target))
-                           :msg (msg "charge " (:title rig-target))}}}
+                          {:msg (simple-msg
+                                 {:effect/type :charge-card
+                                  :effect/card-str rig-target
+                                  :effect/count 1})
+                           :async true
+                           :effect (effect (charge-card state side eid rig-target))}}}
                         card nil)))}})
 
 (defcard "Rip Deal"
