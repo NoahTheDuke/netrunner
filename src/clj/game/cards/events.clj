@@ -4000,7 +4000,11 @@
 (defcard "Sell Out"
   {:on-play {:additional-cost [(->c :resource 1)]
              :async true
-             :msg "gain 4 [Credits] and draw 2 cards"
+             :msg (simple-msg
+                   {:effect/type :gain-credits
+                    :effect/count 4}
+                   {:effect/type :draw-cards
+                    :effect/count 2})
              :effect (effect (wait-for (gain-credits state side 4 {:suppress-checkpoint true})
                                     (draw state side eid 2)))}})
 
