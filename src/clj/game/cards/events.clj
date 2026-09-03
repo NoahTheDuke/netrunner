@@ -3460,9 +3460,11 @@
    :on-play {:prompt "Choose a server"
              :change-in-game-state {:req (req (seq runnable-servers))}
              :choices (effect runnable-servers)
-             :msg (msg (if (<= (count (:hand runner)) 2)
-                         "make a run, and give +2 strength to installed icebreakers"
-                         "make a run"))
+             :msg (simple-msg
+                   :make-a-run
+                   (when (<= (count (:hand runner)) 2)
+                     {:effect/type :give-strength-all-icebreakers-during-run
+                      :effect/bonus 2}))
              :async true
              :effect (effect (when (<= (count (:hand runner)) 2)
                             (pump-all-icebreakers state side 2 :end-of-run))
