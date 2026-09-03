@@ -3696,7 +3696,10 @@
             {:waiting-prompt true
              :prompt "Choose a piece of ice to bypass"
              :choices {:card ice?}
-             :msg (msg "make a run and bypass " (card-str state target))
+             :msg (simple-msg
+                   :make-a-run
+                   {:effect/type :bypass-ice
+                    :effect/title target})
              :async true
              :effect (effect (register-events
                                state side card
@@ -3716,7 +3719,7 @@
              :effect (effect (wait-for
                             (lose-credits state :runner (make-eid state eid) spent)
                             (system-msg state :runner (str "spends " spent " [Credit]"))
-                            (system-msg state :corp (str " guesses " target " [Credit]"))
+                            (system-msg state :corp (str "guesses " target " [Credit]"))
                             (wait-for (trigger-event-simult state side :reveal-spent-credits nil {:runner-credits spent})
                                       (if (not= spent (str->int target))
                                         (continue-ability state :runner (choose-ice) card nil)
