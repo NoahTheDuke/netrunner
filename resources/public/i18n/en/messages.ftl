@@ -243,6 +243,8 @@ trash-or-rearrange-top-of-stack = look at and trash or rearrange the top {$count
     *[other] {$count} cards of {-stack}
 }
 
+swap-two-ice-positions = swap the positions of {$card-str} and {$card-str2}
+
 # advancement counters
 
 place-n-advancement-counters = place {$count ->

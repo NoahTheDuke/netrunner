@@ -6436,7 +6436,8 @@
     (click-card state :runner (get-ice state :hq 1))
     (is (no-prompt? state :runner))
     (is (= "Vanilla" (:title (get-ice state :rd 0))) "Vanilla swapped to R&D")
-    (is (= "Paper Wall" (:title (get-ice state :hq 1))) "Paper Wall swapped to HQ outer position")))
+    (is (= "Paper Wall" (:title (get-ice state :hq 1))) "Paper Wall swapped to HQ outer position")
+    (is (last-log-contains? state #"uses Reshape to swap the positions of ICE protecting R&D at position 0 and ICE protecting HQ at position 1"))))
 
 (deftest retrieval-run-happy-path
     ;; Happy Path

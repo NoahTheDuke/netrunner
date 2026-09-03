@@ -3668,8 +3668,10 @@
                           (ice? %))
               :max 2
               :all true}
-    :msg (msg "swap the positions of " (card-str state (first targets))
-              " and " (card-str state (second targets)))
+    :msg (simple-msg
+          {:effect/type :swap-two-ice-positions
+           :effect/card-str (first targets)
+           :effect/card-str2 (second targets)})
     :effect (effect (swap-ice state side (first targets) (second targets)))}})
 
 (defcard "Retrieval Run"

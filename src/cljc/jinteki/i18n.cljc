@@ -259,11 +259,14 @@
                (transient {}) m)
         card-str (or (:effect/card-str m)
                      (:msg/card-str m))
+        card-str2 (or (:effect/card-str2 m)
+                      (:msg/card-str2 m))
         card-strs (or (:effect/card-strs m)
                       (:msg/card-strs m))]
     (cond-> new-m
       (:msg/payments m) (assoc! "payment" (build-pay-msg (:msg/payments m)))
       card-str (assoc! "card-str" (format-card-str card-str))
+      card-str2 (assoc! "card-str2" (format-card-str card-str2))
       card-strs (assoc! "card-strs" (->> card-strs
                                          (mapv format-card-str)
                                          (str/join (tr :join-list))))

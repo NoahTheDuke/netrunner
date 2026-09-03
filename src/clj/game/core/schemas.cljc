@@ -43,6 +43,7 @@
 (def $add-count [:effect/add-count :int])
 (def $bonus [:effect/bonus :int])
 (def $card-str [:effect/card-str card-schema])
+(def $card-str2 [:effect/card-str2 card-schema])
 (def $card-strs [:effect/card-strs [:sequential card-schema]])
 (def $cards [:effect/cards :int])
 (def $choice [:effect/choice :string])
@@ -179,6 +180,7 @@
 (register-effect :rearrange-installed-ice)
 (register-effect :rearrange-top-n-cards-rd $count)
 (register-effect :trash-or-rearrange-top-of-stack $count)
+(register-effect :swap-two-ice-positions $card-str $card-str2)
 
 ;; advancement counters
 
