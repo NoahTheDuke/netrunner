@@ -3958,7 +3958,9 @@
                             :choices {:req (req (program? target)
                                                      (in-discard? target))}
                             :show-discard true
-                            :msg (msg "put " (:title target) " on the bottom of the stack")
+                            :msg (simple-msg
+                                  {:effect/type :add-card-to-bottom-of-stack
+                                   :effect/card-str target})
                             :effect (effect (move state side target :deck))}]
     {:on-play {:prompt "Choose a program to install"
                :label "Install program from the heap"

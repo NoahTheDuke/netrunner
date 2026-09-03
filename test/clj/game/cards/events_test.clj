@@ -6859,6 +6859,7 @@
       (let [credits (:credit (get-runner))]
         (click-card state :runner "Corroder")
         (click-card state :runner "Mass-Driver")
+        (is (second-last-log-contains? state #"uses Scavenge to trash an installed Corroder and install Mass-Driver"))
         (is (= "Mass-Driver" (:title (get-program state 0))) "Mass-Driver is now installed")
         (is (= (+ credits 2 -8) (:credit (get-runner))) "Scavenge should give discount"))))
 
@@ -6890,6 +6891,7 @@
     (play-from-hand state :runner "Scrounge")
     (click-card state :runner "Ika")
     (click-card state :runner "Mayfly")
+    (is (last-log-contains? state #"uses Scrounge to add Mayfly in the heap to the bottom of the stack"))
     (is-deck? state :runner ["Rezeki" "Mayfly"])))
 
 (deftest scrubbed
