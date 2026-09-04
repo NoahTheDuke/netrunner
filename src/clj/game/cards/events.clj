@@ -4143,7 +4143,11 @@
 (defcard "Spec Work"
   {:on-play
    {:additional-cost [(->c :program 1)]
-    :msg "gain 4 [Credits] and draw 2 cards"
+    :msg (simple-msg
+          {:effect/type :gain-credits
+           :effect/count 4}
+          {:effect/type :draw-cards
+           :effect/count 2})
     :async true
     :effect (effect (wait-for (gain-credits state side 4)
                            (draw state side eid 2)))}})
@@ -4158,7 +4162,10 @@
   {:makes-run true
    :on-play
    {:prompt "Choose 1 non-ice card to expose"
-    :msg "expose 1 card and make a run"
+    :msg (simple-msg
+          {:effect/type :expose-card
+           :effect/title target}
+          :make-a-run)
     :choices {:card #(and (installed? %)
                           (not (ice? %))
                           (corp? %))}
