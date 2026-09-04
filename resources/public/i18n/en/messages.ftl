@@ -110,6 +110,8 @@ trash-all-operations-by-type = trash all {-operation-plural}
 trash-all-resource-by-type = trash all {-resource-plural}
 trash-all-upgrade-by-type = trash all {-upgrade-plural}
 
+trash-all-cards-in-server-at-no-cost = trash all cards in {$server} at no cost
+
 # credits
 
 gain-credits = gain {$count} {-credit}
@@ -389,6 +391,9 @@ access-additional-in-rd = access {$count ->
     [one] 1 additional card in {-rd}
     *[other] {$count} additional cards in {-rd}
 }
+access-from-bottom-of-rd = access cards from the bottom of {-rd}
+
+# searching
 
 search-stack-for-connection-resource = search {-stack} for a connection resource
 search-stack-for-run-event = search {-stack} for a run event

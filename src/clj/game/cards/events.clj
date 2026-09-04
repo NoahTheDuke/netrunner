@@ -4041,7 +4041,7 @@
              :req (req (= :rd (target-server context))
                             this-card-run)
              :silent true
-             :msg "access cards from the bottom of R&D"
+             :msg (simple-msg :access-from-bottom-of-rd)
              :effect (effect (swap! state assoc-in [:runner :rd-access-fn] reverse))}
             {:event :run-ends
              :effect (effect (swap! state assoc-in [:runner :rd-access-fn] seq))}]})
@@ -4055,7 +4055,9 @@
                :mandatory true
                :ability
                {:async true
-                :msg "trash all cards in the server at no cost"
+                :msg (simple-msg
+                      {:effect/type :trash-all-cards-in-server-at-no-cost
+                       :effect/server (first (:server (:run @state)))})
                 :effect (effect (trash-cards state side eid (:content run-server) {:cause-card card}))}})]})
 
 (defcard "Social Engineering"

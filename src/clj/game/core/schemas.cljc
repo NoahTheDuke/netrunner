@@ -98,6 +98,7 @@
 (register-effect :trash-all-operations-by-type)
 (register-effect :trash-all-resource-by-type)
 (register-effect :trash-all-upgrade-by-type)
+(register-effect :trash-all-cards-in-server-at-no-cost $server)
 
 ;; credits
 
@@ -149,7 +150,7 @@
 (register-effect :add-card-to-bottom-of-stack $card-str)
 (register-effect :add-card-to-top-of-rd $title)
 (register-effect :add-card-to-bottom-of-rd $title)
-(register-effect :add-cards-from-heap-to-grip $card-strs)
+(register-effect :add-cards-from-heap-to-grip $titles)
 (register-effect :force-add-all-hq-cards-to-top-of-rd)
 (register-effect :move-seen-unseen-into-grip $seen $unseen-cnt)
 (register-effect :move-seen-into-grip $seen)
@@ -282,6 +283,7 @@
 (register-effect :access-card $card-str)
 (register-effect :access-additional-in-hq $count)
 (register-effect :access-additional-in-rd $count)
+(register-effect :access-from-bottom-of-rd)
 
 ;; searching
 
