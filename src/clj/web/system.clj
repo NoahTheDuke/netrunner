@@ -29,10 +29,14 @@
    [web.app-state :as app-state]
    [web.game]
    [web.lobby :as lobby]
+   [web.logs :refer [timbre-init!]]
    [web.telemetry]
    [web.utils :refer [tick]]
-   [web.versions :refer [banned-msg frontend-version]]
-   [web.ws :as ws]))
+   [web.versions :refer [banned-msg cards-version frontend-version]]
+   [web.ws :as ws]) 
+  (:import
+   [clojure.lang ExceptionInfo]
+   [org.httpkit.server HttpServer]))
 
 (read-write/print-time-literals-clj!)
 
@@ -58,22 +62,27 @@
 (defmethod ig/halt-key! :mongodb/connection [_ {:keys [conn]}]
   (mg/disconnect conn))
 
+(defmethod ig/init-key :logging/timbre [_ config]
+  (timbre-init! config))
+
 (defmethod ig/init-key :web/app [_ opts]
   (if (:server-mode opts)
     (make-app opts)
     (make-dev-app opts)))
 
 (defmethod ig/init-key :web/app-state [_ _]
-  (reset! app-state/app-state
-          {:lobbies {}
-           :lobby-updates {}
-           :users {}}))
+  (reset! app-state/app-state app-state/base-app-state))
+
+(defmethod ig/halt-key! :web/app-state [_ _]
+  (reset! app-state/app-state app-state/base-app-state))
 
 (defmethod ig/init-key :web/server [_ {:keys [app port]}]
-  (run-server app {:port port
-                   :legacy-return-value? false}))
+  (let [^HttpServer s (run-server app {:port port
+                                       :legacy-return-value? false})]
+    {:server s
+     :port (.getPort s)}))
 
-(defmethod ig/halt-key! :web/server [_ server]
+(defmethod ig/halt-key! :web/server [_ {server :server}]
   (when server
     (server-stop! server nil)))
 
@@ -95,23 +104,16 @@
 
 (defmethod ig/init-key :web/banned-msg [_ {initial :initial
                                            {:keys [db]} :mongo}]
-  (if-let [config (mc/find-one-as-map db "config" nil)]
-    (do (reset! banned-msg (:banned-msg config))
-        config)
-    (do (doto db
-          (mc/create "config" nil)
-          (mc/insert-and-return "config" {:banned-msg initial}))
+  (if-let [msg (:banned-msg (mc/find-one-as-map db "config" nil))]
+    (reset! banned-msg msg)
+    (do (mc/insert-and-return db "config" {:banned-msg initial})
         (reset! banned-msg initial))))
 
 (defmethod ig/init-key :frontend/version [_ {initial :initial
                                              {:keys [db]} :mongo}]
-  (if-let [config (mc/find-one-as-map db "config" nil)]
-    (do (reset! frontend-version (:version config))
-        config)
-    (do (doto db
-          (mc/create "config" nil)
-          (mc/insert-and-return "config" {:version initial
-                                          :cards-version 0}))
+  (if-let [version (:version (mc/find-one-as-map db "config" nil))]
+    (reset! frontend-version version)
+    (do (mc/insert-and-return db "config" {:version initial})
         (reset! frontend-version initial))))
 
 (defmethod ig/init-key :web/ws [_ opts]
@@ -149,6 +151,13 @@
                (transient {}))
               (persistent!))))
 
+(defmethod ig/init-key :jinteki/cards-version [_ {initial :initial
+                                                  {:keys [db]} :mongo}]
+  (if-let [version (:cards-version (mc/find-one-as-map db "config" nil))]
+    (reset! cards-version version)
+    (do (mc/insert-and-return db "config" {:cards-version initial})
+        (reset! cards-version initial))))
+
 (defmethod ig/init-key :jinteki/cards [_ {{:keys [db]} :mongo}]
   (let [cards (mc/find-maps db "cards" nil)
         stripped-cards (mapv #(update % :_id str) cards)
@@ -179,19 +188,21 @@
   (reset! cards/cycles nil)
   (reset! cards/mwl nil))
 
-(defn start
-  [& [{:keys [only]}]]
-  (let [config (server-config)]
-    (if only
-      (ig/init config only)
-      (ig/init config))))
-
-(defn stop [system & [{:keys [only]}]]
+(defn stop [system & {:keys [only]}]
   (when system
     (if only
       (ig/halt! system only)
       (ig/halt! system)))
   nil)
+
+(defn start
+  [& {:keys [only]}]
+  (let [config (server-config)]
+    (try (if only
+           (ig/init config only)
+           (ig/init config))
+         (catch ExceptionInfo ex
+           (stop (:system (ex-data ex)))))))
 
 (comment
   (def system (start))
