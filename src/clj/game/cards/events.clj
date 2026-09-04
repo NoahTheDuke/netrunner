@@ -4585,12 +4585,15 @@
              :interactive (effect true)
              :automatic :drain-credits
              :req (req this-card-run (= :hq (target-server context)))
-             :msg (msg
-                    "take 1 tag"
-                    (let [cc (min (:credit corp) 3)]
-                      (when (pos? cc)
-                        (str "and force the Corp to lose " cc " [Credits], and then gain "
-                             (* 2 cc) " [Credits]"))))
+             :msg (simple-msg
+                   {:effect/type :take-tags
+                    :effect/count 1}
+                   (let [cc (min (:credit corp) 3)]
+                     (when (pos? cc)
+                       [{:effect/type :force-corp-lose-credits
+                         :effect/credits cc}
+                        {:effect/type :gain-credits
+                         :effect/count (* 2 cc)}])))
              :async true
              :effect (effect (let [cc (min (:credit corp) 3)]
                                (if (pos? cc)
@@ -4646,7 +4649,9 @@
                                   (map unknown->kw)
                                   (filter is-remote?)
                                   (map remote->name))))
-             :msg (msg "make a run on " target)
+             :msg (simple-msg
+                   {:effect/type :make-a-run-on
+                    :effect/server target})
              :async true
              :effect (effect (make-run state side eid target card))}]})
 

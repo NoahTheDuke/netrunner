@@ -355,11 +355,12 @@
   ([card effect-msgs] (->use-card-msg card effect-msgs nil nil))
   ([card effect-msgs payments] (->use-card-msg card effect-msgs payments nil))
   ([card effect-msgs payments args]
-   (cond-> (->effect-msg {:msg/type (if (seq payments) :pay-use-card :use-card)
-                          :msg/effect-msgs (vec (keep msg-map->effect-msg effect-msgs))
-                          :msg/payments payments
-                          :title (get-title card)})
-     (map? args) (merge args))))
+   (let [effect-msgs (flatten effect-msgs)]
+     (cond-> (->effect-msg {:msg/type (if (seq payments) :pay-use-card :use-card)
+                            :msg/effect-msgs (vec (keep msg-map->effect-msg effect-msgs))
+                            :msg/payments payments
+                            :title (get-title card)})
+       (map? args) (merge args)))))
 
 #?(:clj
    (defmacro simple-msg
