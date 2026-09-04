@@ -311,6 +311,14 @@ force-corp-trash = force the Corp to trash {$title}
 force-add-all-hq-cards-to-top-of-rd = force {-corp(case: "nominative")} to add all cards in {-hq} to the top of {-rd}
 force-corp-pay-credits = force {-corp(case: "nominative")} to pay {$credits} {-credit}
 force-corp-lose-credits = force {-corp(case: "nominative")} to lose {$credits} {-credit}
+force-corp-draw-cards = force {-corp(case: "nominative")} to draw {$count ->
+    [one] 1 card
+    *[other] {$count} cards
+}
+force-corp-discard-from-hq = force {-corp(case: "nominative")} to discard {$count ->
+    [one] 1 card from {-hq}
+    *[other] {$count} cards from {-hq}
+}
 
 each-player-draws-cards = make each player draw {$count ->
     [one] 1 card

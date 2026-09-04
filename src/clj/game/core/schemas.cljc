@@ -210,6 +210,8 @@
 (register-effect :force-corp-trash $title)
 (register-effect :force-corp-pay-credits $credits)
 (register-effect :force-corp-lose-credits $credits)
+(register-effect :force-corp-draw-cards $count)
+(register-effect :force-corp-discard-from-hq $count)
 
 (register-effect :each-player-draws-cards $count)
 

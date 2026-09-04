@@ -7308,6 +7308,7 @@
         (is (= 2 (get-counters imp :virus)) "Imp has 2 counters after install")
         (play-from-hand state :runner "Surge")
         (click-card state :runner imp)
+        (is (last-log-contains? state "uses Surge to place 2 virus counters on Imp"))
         (is (= 4 (get-counters (refresh imp) :virus)) "Imp has 4 counters after surge"))))
 
 (deftest surge-don-t-fire-surge-if-target-is-not-a-virus
@@ -7371,6 +7372,7 @@
         (click-prompt state :corp "Discard 2 cards from HQ")
         (click-card state :corp (first (:hand (get-corp))))
         (click-card state :corp (second (:hand (get-corp))))
+        (is (last-log-contains? state "uses SYN Attack to force the Corp to discard 2 cards from HQ"))
         (is (= (+ hand -2) (count (:hand (get-corp)))) "Corp should discard 2 cards"))))
 
 (deftest system-outage

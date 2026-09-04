@@ -4249,7 +4249,9 @@
 
 (defcard "Strike Fund"
   {:on-play {:async true
-             :msg "gain 4 [Credits]"
+             :msg (simple-msg
+                   {:effect/type :gain-credits
+                    :effect/count 4})
              :effect (effect (gain-credits state :runner nil 4)
                           (effect-completed state side eid))}
    :on-trash {:when-inactive true
@@ -4260,7 +4262,9 @@
               :effect (effect (continue-ability
                                 state side {:optional {:prompt "Gain 2 [Credits]?"
                                             :waiting-prompt true
-                                            :yes-ability {:msg "gain 2 [Credits]"
+                                            :yes-ability {:msg (simple-msg
+                                                                {:effect/type :gain-credits
+                                                                 :effect/count 2})
                                                           :async true
                                                           :effect (effect (gain-credits state :runner eid 2))}
                                             :no-ability
@@ -4285,7 +4289,10 @@
     {:on-play
      {:req (req (placed-virus-cards state))
       :choices {:req (req (some #(same-card? % target) (placed-virus-cards state)))}
-      :msg (msg "place 2 virus counters on " (:title target))
+      :msg (simple-msg
+            {:effect/type :place-virus-counters
+             :effect/count 2
+             :effect/title target})
       :async true
       :effect (effect (add-counter state :runner eid target :virus 2 nil))}}))
 
@@ -4295,10 +4302,16 @@
     :waiting-prompt true
     :prompt "Choose one"
     :choices (effect [(when (<= 2 (count (:hand corp)))
-                     "Discard 2 cards from HQ")
-                   "Draw 4 cards"])
+                        "Discard 2 cards from HQ")
+                      "Draw 4 cards"])
     :async true
-    :msg (msg "force the Corp to " (decapitalize target))
+    :msg (simple-msg
+          (if (= target "Draw 4 cards")
+            {:effect/type :force-corp-draw-cards
+             :effect/count 4}
+            {:effect/type :force-corp-discard-from-hq
+             :effect/count 2}))
+    ; :msg (msg "force the Corp to " (decapitalize target))
     :effect (effect (if (= target "Draw 4 cards")
                    (wait-for (draw state :corp 4)
                              (effect-completed state side eid))
