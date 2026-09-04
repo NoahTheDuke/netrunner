@@ -1951,7 +1951,7 @@
 (defcard "Guinea Pig"
   {:on-play
    {:msg (simple-msg
-          {:effect/type :trash-all-cards-in-grip}
+          :trash-all-cards-in-grip
           {:effect/type :gain-credits
            :effect/count 10})
     :async true
@@ -4471,8 +4471,10 @@
                               {:async true
                                :prompt "Choose a server"
                                :choices (effect runnable-servers)
-                               :msg (msg "trash [their] grip and make a run on " target
-                                         ", preventing all damage")
+                               :msg (simple-msg
+                                     :trash-all-cards-in-grip
+                                     {:effect/type :make-a-run-on-preventing-all-damage
+                                      :effect/server target})
                                :effect (effect (make-run state side eid target card))}
                               card nil)))}})
 
@@ -4703,7 +4705,7 @@
           {:effect/type :draw-cards
            :effect/count 4}
           (when (pos? (:click runner))
-            {:effect/type :lose-click
+            {:effect/type :lose-clicks
              :effect/count 1}))
     :change-in-game-state {:req (req (or (seq (:deck runner))
                                          (pos? (:click runner))))}
@@ -4719,9 +4721,11 @@
               {:target-server :hq
                :this-card-run true
                :ability
-               {:msg (msg "force the Corp to discard " (quantify target "card") " from HQ at random")
-                :prompt "How many [Click] do you want to spend?"
+               {:prompt "How many [Click] do you want to spend?"
                 :choices (effect (map str (range 0 (inc (:click runner)))))
+                :msg (simple-msg
+                      {:effect/type :force-corp-random-discard-from-hq
+                       :effect/count (parse-long target)})
                 :async true
                 :effect (effect (let [n (str->int target)]
                                (wait-for [{:keys [msg]} (pay state :runner (make-eid state eid) card (->c :click n))]
@@ -4733,7 +4737,9 @@
             [{:event :pre-access-card
               :duration :end-of-game
               :req (req (same-card? :title burned-card (:accessed-card context)))
-              :msg (msg (str "remove " (:title burned-card) " from the game"))
+              :msg (simple-msg
+                    {:effect/type :rfg-card
+                     :effect/title burned-card})
               :effect (effect (move state :corp (:accessed-card context) :rfg))}])]
     {:makes-run true
      :on-play run-remote-server-ability
@@ -4741,7 +4747,9 @@
                :req (req (not (agenda? (:accessed-card context)))
                               (:successful run))
                :once :per-run
-               :msg (msg "remove " (:title (:accessed-card context)) " from the game, and watch for other copies of " (:title (:accessed-card context)) " to burn")
+               :msg (simple-msg
+                     {:effect/type :rfg-card
+                      :effect/title (:accessed-card context)})
                :effect (effect (move state :corp (:accessed-card context) :rfg)
                          (register-events state side card (rfg-card-event (:accessed-card context))))}]}))
 
@@ -4756,7 +4764,10 @@
                       :choices {:req (req (corp? target)
                                                (in-hand? target))
                                 :max (effect (min 2 (count (:hand corp))))}
-                      :msg (msg "shuffle " (enumerate-cards targets :sorted) " into R&D")
+                      :msg (simple-msg
+                            {:effect/type :shuffle-cards-into-rd
+                             :effect/count (count targets)
+                             :effect/titles (sort-by get-title targets)})
                       :effect (effect (doseq [t targets]
                                      (move state :corp t :deck))
                                    (shuffle! state :corp :deck))})}}})
@@ -4765,12 +4776,16 @@
   {:on-play (choose-one-helper
               {:player :corp}
               [{:option "Runner gains 6 [Credits]"
-                :ability {:msg "force the Runner to gain 6 [Credits]"
+                :ability {:msg (simple-msg
+                                {:effect/type :force-runner-gain-credits
+                                 :effect/credits 6})
                           :display-side :corp
                           :async true
                           :effect (effect (gain-credits state :runner eid 6))}}
                {:option "Runner draws 4 cards"
-                :ability {:msg "force the Runner to draw 4 cards"
+                :ability {:msg (simple-msg
+                                {:effect/type :force-runner-draw-cards
+                                 :effect/count 4})
                           :display-side :corp
                           :async true
                           :effect (effect (draw state :runner eid 4))}}])})

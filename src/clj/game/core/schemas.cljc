@@ -134,6 +134,7 @@
 ;; corp shuffling
 
 (register-effect :shuffle-cards-in-server-into-rd $server)
+(register-effect :shuffle-cards-into-rd $count $titles)
 
 ;; score area stuff
 
@@ -159,6 +160,10 @@
 (register-effect :move-seen-unseen-into-hq $seen $unseen-cnt)
 (register-effect :move-seen-into-hq $seen)
 (register-effect :move-unseen-into-hq $unseen-cnt)
+
+;; remove from the game (rfg)
+
+(register-effect :rfg-card $title)
 
 ;; reveal
 
@@ -212,6 +217,10 @@
 (register-effect :force-corp-lose-credits $credits)
 (register-effect :force-corp-draw-cards $count)
 (register-effect :force-corp-discard-from-hq $count)
+(register-effect :force-corp-random-discard-from-hq $count)
+
+(register-effect :force-runner-draw-cards $count)
+(register-effect :force-runner-gain-credits $credits)
 
 (register-effect :each-player-draws-cards $count)
 
@@ -244,6 +253,7 @@
 
 (register-effect :make-a-run)
 (register-effect :make-a-run-on $server)
+(register-effect :make-a-run-on-preventing-all-damage $server)
 (register-effect :run-on-with-no-rezzed-ice $server)
 (register-effect :rfg-to-make-a-run-on $title $server)
 

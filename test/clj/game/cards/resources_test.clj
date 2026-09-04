@@ -4594,7 +4594,7 @@
         (take-credits state :runner)
         (is (changed? [(count (:hand (get-runner))) -1]
               (click-prompt state :runner "Trash a random card from the grip")
-              (is (last-log-contains? state "Runner trashes 1 card (Sure Gamble) randomly from the grip to satisfy Mystic Maemi.")))
+              (is (last-log-contains? state "randomly trashes 1 card (Sure Gamble) from the grip to satisfy Mystic Maemi.")))
             "Trashed one card from grip")
         (take-credits state :corp)
         (play-from-hand state :runner "Sure Gamble")

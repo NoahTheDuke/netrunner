@@ -161,7 +161,7 @@ shuffle-grip-and-heap-into-stack = shuffle { -grip } and { -heap } into { -stack
 shuffle-self-into-stack = shuffle itself into {-stack}
 shuffle-cards-into-stack = shuffle {$count ->
     [zero] 0 cards into {-stack}
-    [one] 1 card ({$titles}) into {-stack}
+    [one] {$titles} into {-stack}
     *[other] {$count} cards ({$titles}) into {-stack}
 }
 shuffle-stack = shuffle {-stack}
@@ -169,6 +169,11 @@ shuffle-stack = shuffle {-stack}
 # corp shuffling
 
 shuffle-cards-in-server-into-rd = shuffle all cards in {$server} into {-rd}
+shuffle-cards-into-rd = shuffle {$count ->
+    [zero] 0 cards into {-rd}
+    [one] {$titles} into {-rd}
+    *[other] {$count} cards ({$titles}) into {-rd}
+}
 
 # score area stuff
 
@@ -214,6 +219,10 @@ move-unseen-into-hq = move {$unseen-cnt ->
     [one] 1 unseen card into {-hq}
     *[other] {$unseen-cnt} unseen cards into {-hq}
 }
+
+# remove from the game (rfg)
+
+rfg-card = remove {$title} from the game
 
 # reveal
 
@@ -319,6 +328,17 @@ force-corp-discard-from-hq = force {-corp(case: "nominative")} to discard {$coun
     [one] 1 card from {-hq}
     *[other] {$count} cards from {-hq}
 }
+force-corp-random-discard-from-hq = force {-corp(case: "nominative")} to discard {$count ->
+    [one] 1 card from {-hq} at random
+    *[other] {$count} cards from {-hq} at random
+}
+
+force-runner-draw-cards = force {-runner(case: "nominative")} to draw {$count ->
+    [one] 1 card
+    *[other] {$count} cards
+}
+
+force-runner-gain-credits = force {-runner(case: "nominative")} to gain {$credits} {-credit}
 
 each-player-draws-cards = make each player draw {$count ->
     [one] 1 card
@@ -355,6 +375,7 @@ derez-cards = derez {$card-strs}
 
 make-a-run = make a run
 make-a-run-on = make a run on {$server}
+make-a-run-on-preventing-all-damage = make a run on {$server}, preventing all damage
 run-on-with-no-rezzed-ice = make a run on {$server} during which no ice can be rezzed
 rfg-to-make-a-run-on = remove {$title} from the game to make a run on {$server}
 
@@ -537,22 +558,22 @@ payment-reveal-trash-from-hq = reveals and trashes {$count ->
     [one] 1 card ({$titles}) from {-hq}
     *[other] {$count} cards ({$titles}) from {-hq}
 }
-payment-random-trash-from-grip = randomly trashes {$count ->
+payment-randomly-trash-from-grip = randomly trashes {$count ->
     [zero] no cards from {-grip}
     [one] 1 card ({$titles}) from {-grip}
     *[other] {$count} cards ({$titles}) from {-grip}
 }
-payment-random-trash-from-hq = randomly trashes {$count ->
+payment-randomly-trash-from-hq = randomly trashes {$count ->
     [zero] no cards from {-hq}
     [one] 1 card from {-hq}
     *[other] {$count} cards from {-hq}
 }
-payment-random-reveal-trash-from-grip = reveals and trashes {$count ->
+payment-randomly-reveal-trash-from-grip = reveals and trashes {$count ->
     [zero] no cards from {-grip}
     [one] 1 random card ({$titles}) from {-grip}
     *[other] {$count} random cards ({$titles}) from {-grip}
 }
-payment-random-reveal-trash-from-hq = reveals and trashes {$count ->
+payment-randomly-reveal-trash-from-hq = reveals and trashes {$count ->
     [zero] no cards from {-hq}
     [one] 1 random card ({$titles}) from {-hq}
     *[other] {$count} random cards ({$titles}) from {-hq}

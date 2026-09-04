@@ -943,7 +943,7 @@
                           {:paid/msg (str "reveals and trashes " (quantify (count async-result) "card")
                                           " (" (enumerate-cards to-trash :sorted) ")"
                                           " from " hand)
-                           :paid/type (if (= :corp side) :random-reveal-trash-from-hq :random-reveal-trash-from-grip)
+                           :paid/type (if (= :corp side) :randomly-reveal-trash-from-hq :randomly-reveal-trash-from-grip)
                            :paid/value (count async-result)
                            :paid/targets async-result})))))
 

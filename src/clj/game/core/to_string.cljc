@@ -31,7 +31,7 @@
                                 (when installed-ice
                                   (str " at position " (card-index state card)))))))
                   ;; Runner card messages
-                  (str (if (or facedown (not visible))
+                  (str (if (or facedown visible)
                          "a facedown card"
                          (get-title card))
                     (when (= :scored (first zone))
