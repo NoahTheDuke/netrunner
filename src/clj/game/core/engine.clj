@@ -316,7 +316,7 @@
                  (string? message) message
                  (= :cost message) (->effect-msg {:msg/type :satisfy-card
                                                   :msg/payments (vals (:cost-paid eid))
-                                                  :title (get-title card)})
+                                                  :msg/title (get-title card)})
                  :else (message state side eid card targets))]
       (cond
         (map? desc) (assoc desc :side side)

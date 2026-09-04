@@ -255,8 +255,8 @@
                      (move state side c :rfg))
                    (system-msg state side
                                {:msg/type :msg-rfg-n-cards-from-stack
-                                :count (count top-5)
-                                :card-strs top-5})
+                                :msg/count (count top-5)
+                                :msg/card-strs top-5})
                    (draw state :runner eid 5 {:loud true})))}})
 
 (defcard "Bahia Bands"

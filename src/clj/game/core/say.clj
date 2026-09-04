@@ -1,15 +1,11 @@
 (ns game.core.say
   (:require
    [cljc.java-time.instant :as inst]
-   [clojure.java.io :as io]
    [clojure.pprint :as pprint]
    [clojure.string :as str]
-   [game.core.card :refer [get-title]]
-   [game.core.schemas :as schemas]
    [game.core.toasts :refer [toast]]
    [jinteki.cards :refer [all-cards]]
-   [malli.core :as m]
-   [noahtheduke.fluent :as fluent]))
+   [jinteki.i18n :refer [->msg-map]]))
 
 (defn make-message
   "Create a message map, along with timestamp if none is provided."
@@ -245,20 +241,24 @@
        (pprint/pprint)))
 
 (defn ^:private prep-msg
-  [state side text]
+  [state side msg]
   (let [username (get-in @state [side :user :username])]
-    (merge {:username username
-            :side side}
-      (if (string? text)
-        {:raw-text (str username " " text ".")}
-        text))))
+    (cond
+      (map? msg) (->msg-map msg {:username username
+                                 :side side
+                                 :msg/username username})
+      (string? msg) {:username username
+                     :side side
+                     :raw-text (str username " " msg ".")}
+      :else (throw (ex-info "malformed message" {:side side
+                                                 :msg msg})))))
 
 (defn system-msg
   "Prints a message to the log without a username."
-  ([state side text] (system-msg state side text nil))
-  ([state side text args]
-   (let [msg (prep-msg state side text)]
-     (system-say state side msg args))))
+  ([state side msg] (system-msg state side msg nil))
+  ([state side msg args]
+   (let [msg' (prep-msg state side msg)]
+     (system-say state side msg' args))))
 
 (defn multi-msg
   [state side message-map]

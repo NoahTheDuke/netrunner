@@ -8,7 +8,7 @@
    #?(:cljs [nr.ajax :refer [GET]])
    [clojure.string :as str]
    [game.core.card :refer [get-title]]
-   [game.core.schemas :as schemas :refer [EffectMsg]]
+   [game.core.schemas :as schemas :refer [EffectMsg MsgMap]]
    [game.core.to-string :refer [card-str-edn]]
    [noahtheduke.fluent :as fluent]))
 
@@ -359,7 +359,7 @@
      (cond-> (->effect-msg {:msg/type (if (seq payments) :pay-use-card :use-card)
                             :msg/effect-msgs (vec (keep msg-map->effect-msg effect-msgs))
                             :msg/payments payments
-                            :title (get-title card)})
+                            :msg/title (get-title card)})
        (map? args) (merge args)))))
 
 #?(:clj
@@ -379,3 +379,13 @@
      [opt & opts]
      `(game.macros/effect
        (->use-card-msg ~'card [~opt ~@opts] (vals (:cost-paid ~'eid))))))
+
+(defn ->msg-map
+  ([m] (->msg-map m nil))
+  ([m args]
+   (when m
+     (if (keyword? m)
+       {:msg/type m}
+       (-> m
+           (merge args)
+           (schemas/assert MsgMap))))))

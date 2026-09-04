@@ -62,18 +62,11 @@
 (def $unseen-cnt [:effect/unseen-cnt :int])
 (def $value [:effect/value :int])
 
-(defn map-schema
-  [kvs]
-  (m/schema (apply vector :map kvs)))
-
 (def effect-registry (atom {}))
 (defn register-effect
   [kw & kvs]
-  (swap! effect-registry assoc kw (map-schema kvs))
+  (swap! effect-registry assoc kw (m/schema (into [:map] kvs)))
   kw)
-
-(register-effect :use-card $username $title $do-ability)
-(register-effect :pay-use-card $username $payment $title $do-ability)
 
 ;; generic
 
@@ -410,16 +403,22 @@
 (def Msg
   (m/schema
     [:map
-     [:msg/type :keyword]
-     [:msg/effect-msgs [:sequential EffectMsg]]
-     [:msg/payments [:sequential :map]]
-     [:title [:maybe :string]]]))
+     [:msg/type :keyword]]))
 
 (def msg-registry (atom {}))
+(defn strip-effect-ns
+  [[k & args]]
+  (into [(keyword "msg" (name k))] args))
+
 (defn register-msg
   [kw & kvs]
-  (swap! msg-registry assoc kw (mu/merge Msg (map-schema kvs)))
+  (let [schema (into [:map] (mapv strip-effect-ns kvs))]
+    (swap! msg-registry assoc kw (mu/merge Msg schema)))
   kw)
+
+(register-msg :use-card)
+(register-msg :pay-use-card)
+(register-msg :satisfy-card)
 
 (register-msg :increase-trace-strength $username $payment $value)
 (register-msg :corp-start-of-turn $username $turn $credits $cards)
@@ -453,9 +452,10 @@
 (register-msg :msg-trash-cards $username $count $titles)
 
 (register-msg :msg-derez-card $username $card-str)
+(register-msg :msg-derez-cards $username $card-strs)
 (register-msg :msg-rfg-n-cards-from-stack $username $count $card-strs)
 
 (def MsgMap
   (m/schema
-   `[:multi {:dispatch :effect/type}
+   `[:multi {:dispatch :msg/type}
      ~@@msg-registry]))

@@ -33,9 +33,9 @@
                    [false true] :runner-start-of-turn
                    [false false] :runner-end-of-turn)
         m {:msg/type msg-type
-           :turn (:turn @state)
-           :cards (count (get-in @state [side :hand]))
-           :credits (get-in @state [side :credit])}]
+           :msg/turn (:turn @state)
+           :msg/cards (count (get-in @state [side :hand]))
+           :msg/credits (get-in @state [side :credit])}]
     (system-msg state side m {:hr (not start-of-turn)})))
 
 (defn end-phase-12
@@ -164,9 +164,9 @@
              :effect (effect
                       (let [m (if (= :corp side)
                                 {:msg/type :corp-discard-cards-from-hand-eot
-                                 :cards (count targets)}
+                                 :msg/cards (count targets)}
                                 {:msg/type :runner-discard-cards-from-hand-eot
-                                 :cards (enumerate-str (map :title targets))})]
+                                 :msg/cards (count targets)})]
                         (system-msg state side m))
                       (let [discard (mapv #(move state side % :discard) targets)
                             ev (if (= :corp side) :corp-discard-to-hand-size :runner-discard-to-hand-size)]
@@ -219,7 +219,7 @@
                    (start-turn state side nil)
                    (swap! state update-in [side :extra-turns] dec)
                    (system-msg state side {:msg/type :extra-turns-remaining
-                                           :turns extra-turns})))
+                                           :msg/turns extra-turns})))
                (effect-completed state side eid)))))
 
 (defn post-discard-pass-priority
