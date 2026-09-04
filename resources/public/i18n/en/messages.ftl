@@ -334,6 +334,7 @@ install-program-from-stack = install a {-program} from {-stack}
 # hosting
 
 host-self-as-condition-counter = host itself on {$card-str} as a hosted condition counter
+host-card-on-card = host {$title} on {$card-str}
 
 # rezzing
 

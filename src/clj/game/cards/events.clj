@@ -3707,7 +3707,9 @@
                                  [{:event :encounter-ice
                                    :automatic :bypass
                                    :req (req (same-card? target-ice (:ice context)))
-                                   :msg (msg "bypass " (:title (:ice context)))
+                                   :msg (simple-msg
+                                         {:effect/type :bypass-ice
+                                          :effect/card-str (:ice context)})
                                    :effect (effect (bypass-ice state))}]))
                              (make-run state side eid (second (get-zone target)) card))})
           (corp-choice [choices spent]
@@ -4194,7 +4196,10 @@
                                  {:prompt "Choose a piece of ice protecting this server"
                                   :choices {:card #(and (ice? %)
                                                         (= (first (:server run)) (second (get-zone %))))}
-                                  :msg (msg "host " (:title trojan) " on " (card-str state target))
+                                  :msg (simple-msg
+                                        {:effect/type :host-card-on-card
+                                         :effect/title trojan
+                                         :effect/card-str target})
                                   :effect (effect (host state side target trojan)
                                                (update-all-ice state side))}
                                  card nil)))}]})

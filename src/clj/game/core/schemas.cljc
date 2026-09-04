@@ -228,6 +228,7 @@
 ;; hosting
 
 (register-effect :host-self-as-condition-counter $card-str)
+(register-effect :host-card-on-card $title $card-str)
 
 ;; rezzing
 
