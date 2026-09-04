@@ -151,22 +151,18 @@
   "Returns a list of all costs (printed and additional) required to use a given ability"
   ([state side ability card] (card-ability-cost state side ability card nil))
   ([state side ability card targets]
-   (let [base-cost [(:cost ability)
-                    (when-let [cost-bonus-fn (:cost-bonus ability)]
-                      (cost-bonus-fn state side (make-eid state) card targets))
-                    (get-effects state side :card-ability-cost
-                                 {:card card
-                                  :ability ability
-                                  :targets targets})]
-         additional-cost (->> [(:additional-cost ability)
-                               (get-effects state side :card-ability-additional-cost
-                                            {:card card
-                                             :ability ability
-                                             :targets targets})]
-                              (flatten)
-                              ; TODO: uncomment when implementing additional costs
-                              #_(keep #(when % (assoc % :cost/additional true))))]
-     (merge-costs (into base-cost additional-cost)))))
+   (merge-costs [(:cost ability)
+                 (when-let [cost-bonus-fn (:cost-bonus ability)]
+                   (cost-bonus-fn state side (make-eid state) card targets))
+                 (get-effects state side :card-ability-cost
+                              {:card card
+                               :ability ability
+                               :targets targets})
+                 (:additional-cost ability)
+                 (get-effects state side :card-ability-additional-cost
+                              {:card card
+                               :ability ability
+                               :targets targets})])))
 
 (defn break-sub-ability-cost
   ([state side ability card] (break-sub-ability-cost state side ability card nil))
