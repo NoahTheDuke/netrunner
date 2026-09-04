@@ -7826,6 +7826,7 @@
         (is (= runner-credits (:credit (get-runner)))
             "Paid 1 credit to play Trade-In and gained 1 credits from trashing Sports Hopper")
         (click-prompt state :runner (first (prompt-buttons :runner)))
+        (print-logs state)
         (is (= 4 (count (:discard (get-runner)))) "2 Trade-In, 1 Astrolabe and 1 Sports Hopper in discard")))))
 
 (deftest traffic-jam

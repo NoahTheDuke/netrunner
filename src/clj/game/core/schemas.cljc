@@ -261,6 +261,8 @@
 
 ;; ice
 
+(register-effect :ice-gains-barrier-code-gate-sentry-end-of-turn $card-str)
+
 (register-effect :bypass-ice $card-str)
 
 (register-effect :prevent-run-ending)

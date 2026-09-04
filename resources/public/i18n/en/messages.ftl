@@ -372,6 +372,8 @@ give-strength-all-icebreakers-during-run = give +{$bonus} strength to all icebre
 
 # ice
 
+ice-gains-barrier-code-gate-sentry-end-of-turn = {$card-str} gains barrier, code gate, and sentry until end of turn
+
 bypass-ice = bypass {$card-str}
 
 prevent-run-ending = prevent the run from ending

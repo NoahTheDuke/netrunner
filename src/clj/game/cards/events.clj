@@ -60,11 +60,11 @@
    [game.core.memory :refer [available-mu]]
    [game.core.moving :refer [as-agenda flip-facedown forfeit mill move
                              swap-ice trash trash-cards]]
-   [game.core.payment :refer [->c can-pay? x-cost-value]]
+   [game.core.payment :refer [->c can-pay? cost-target x-cost-value]]
    [game.core.play-instants :refer [play-instant]]
-   [game.core.prevention :refer [damage-name damage-type prevent-damage
-                                 prevent-end-run prevent-up-to-n-damage
-                                 prevent-up-to-n-tags preventable?]]
+   [game.core.prevention :refer [damage-type prevent-damage prevent-end-run
+                                 prevent-up-to-n-damage prevent-up-to-n-tags
+                                 preventable?]]
    [game.core.prompts :refer [cancellable clear-wait-prompt]]
    [game.core.props :refer [add-counter add-prop]]
    [game.core.revealing :refer [reveal reveal-loud]]
@@ -4531,7 +4531,9 @@
    {:prompt "Choose a piece of ice"
     :choices {:card (every-pred ice? installed?)}
     :change-in-game-state {:req (req (some ice? (all-installed state :corp)))}
-    :msg (msg "make " (card-str state target) " gain Sentry, Code Gate, and Barrier until the end of the turn")
+    :msg (simple-msg
+          {:effect/type :ice-gains-barrier-code-gate-sentry-end-of-turn
+           :effect/card-str target})
     :effect (effect (let [ice target]
                    (register-lingering-effect
                      state side card
@@ -4548,24 +4550,27 @@
 
 (defcard "Trade-In"
   ;; TODO: look at me plz 👀
-  (letfn [(trashed-hw [state] (last (get-in @state [:runner :discard])))]
-    {:on-play
-     {:additional-cost [(->c :hardware 1)]
-      :msg (msg (let [{:keys [title cost]} (trashed-hw state)]
-                  (str "trash " title " and gain " (quot cost 2) " [Credits]")))
-      :async true
-      :effect (effect (let [{:keys [cost]} (trashed-hw state)]
-                     (wait-for (gain-credits state :runner (quot cost 2))
-                               (continue-ability
-                                 state :runner
-                                 {:prompt "Choose a piece of hardware to add to the grip"
-                                  :choices (effect (filter hardware?
-                                                        (:deck runner)))
-                                  :msg (msg "add " (:title target) " from the stack to the Grip and shuffle the stack")
-                                  :effect (effect (trigger-event state side :searched-stack)
-                                                  (shuffle! state side :deck)
-                                                  (move state side target :hand))}
-                                 card nil))))}}))
+  {:on-play
+   {:additional-cost [(->c :hardware 1)]
+    :msg (simple-msg
+          {:effect/type :gain-credits
+           :effect/count (quot (:cost (cost-target eid :trash-hardware)) 2)})
+    :async true
+    :effect (effect (let [value (quot (:cost (cost-target eid :trash-hardware)) 2)]
+                      (wait-for (gain-credits state :runner value)
+                        (continue-ability
+                          state :runner
+                          {:prompt "Choose a piece of hardware to add to the grip"
+                           :choices (effect (filter hardware?
+                                                    (:deck runner)))
+                           :msg (simple-msg
+                                 {:effect/type :add-card-from-stack-to-grip
+                                  :effect/card-str target}
+                                 :shuffle-stack)
+                           :effect (effect (trigger-event state side :searched-stack)
+                                           (shuffle! state side :deck)
+                                           (move state side target :hand))}
+                          card nil))))}})
 
 (defcard "Traffic Jam"
   {:static-abilities [{:type :advancement-requirement
@@ -4622,7 +4627,11 @@
              :req (req (= :rd (target-server context))
                             this-card-run
                             (= (get-in card [:special :run-eid :eid]) (get-in @state [:run :eid :eid])))
-             :msg "place 2 [Credits] on itself and access 1 additional card from R&D"
+             :msg (simple-msg
+                   {:effect/type :place-credits-on-self
+                    :effect/credits 2}
+                   {:effect/type :access-additional-in-rd
+                    :effect/count 1})
              :async true
              :effect (effect
                        (register-events
