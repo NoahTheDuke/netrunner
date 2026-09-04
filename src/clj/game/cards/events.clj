@@ -4505,7 +4505,7 @@
 (defcard "The Price of Freedom"
   {:on-play {:additional-cost [(->c :connection 1)]
              :rfg-instead-of-trashing true
-             :msg (msg "prevent the Corp from advancing cards during [their] next turn")}
+             :msg (simple-msg :prevent-corp-advancing-cards-next-turn)}
    :events [{:event :corp-turn-begins
              :duration :until-runner-turn-begins
              :effect (effect (register-turn-flag!
@@ -4520,7 +4520,9 @@
                         :automatic :gain-credits
                         :duration :end-of-turn
                         :unregister-once-resolved true
-                        :msg (msg "gain " (* 2 (count (:successful-run runner-reg))) " [Credits]")
+                        :msg (simple-msg
+                              {:effect/type :gain-credits
+                               :effect/count (* 2 (count (:successful-run runner-reg)))})
                         :async true
                         :effect (effect (gain-credits state side eid (* 2 (count (:successful-run runner-reg)))))}]))}})
 
