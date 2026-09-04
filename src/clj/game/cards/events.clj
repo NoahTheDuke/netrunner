@@ -4067,7 +4067,9 @@
                           (installed? %)
                           (ice? %))}
     :change-in-game-state {:req (req (some (every-pred ice? (complement rezzed?)) (all-installed state :corp)))}
-    :msg (msg "select " (card-str state target))
+    :msg (simple-msg
+          {:effect/type :select
+           :effect/card-str target})
     :effect (effect
               (register-events
                 state side card
@@ -4075,7 +4077,9 @@
                   [{:event :rez
                     :duration :end-of-turn
                     :req (req (same-card? (:card context) ice))
-                    :msg (msg "gain " (rez-cost state side (get-card state (:card context))) " [Credits]")
+                    :msg (simple-msg
+                          {:effect/type :gain-credits
+                           :effect/count (rez-cost state side (get-card state (:card context)))})
                     :async true
                     :effect (effect (gain-credits state :runner eid (rez-cost state side (get-card state (:card context)))))}])))}})
 

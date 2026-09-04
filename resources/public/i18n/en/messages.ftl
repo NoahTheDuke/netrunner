@@ -83,6 +83,7 @@ join-list = ,{" "}
 do-nothing = do nothing
 play-card = play {$title}
 play-card-no-additional-costs = play {$title}, ignoring additional costs
+select = select {$card-str}
 
 # trashing cards
 

@@ -78,6 +78,7 @@
 ;; generic
 
 (register-effect :do-nothing)
+(register-effect :select $card-str)
 (register-effect :play-card $title)
 (register-effect :play-card-no-additional-costs $title)
 
