@@ -4311,7 +4311,6 @@
              :effect/count 4}
             {:effect/type :force-corp-discard-from-hq
              :effect/count 2}))
-    ; :msg (msg "force the Corp to " (decapitalize target))
     :effect (effect (if (= target "Draw 4 cards")
                    (wait-for (draw state :corp 4)
                              (effect-completed state side eid))
@@ -4331,7 +4330,9 @@
 (defcard "System Outage"
   {:events [{:event :corp-draw
              :req (req (not (first-event? state side :corp-draw)))
-             :msg "force the Corp to lose 1 [Credits]"
+             :msg (simple-msg
+                   {:effect/type :force-corp-lose-credits
+                    :effect/credits 1})
              :async true
              :effect (effect (lose-credits state :corp eid 1))}]})
 
@@ -4369,7 +4370,9 @@
    :events [{:event :successful-run
              :req (req (#{:hq :rd} (target-server context))
                             (pos? (or (:subroutines-fired context) 0)))
-             :msg "force the Corp to take 1 bad publicity"
+             :msg (simple-msg
+                   {:effect/type :force-corp-lose-credits
+                    :effect/credits 1})
              :async true
              :effect (effect (gain-bad-publicity state :corp eid 1 {:card card}))}]})
 
