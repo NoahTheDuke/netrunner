@@ -225,7 +225,9 @@
 
 (register-effect :install-from-stack $title)
 (register-effect :install-from-stack-with-discount $title $discount)
+(register-effect :install-program-from-heap)
 (register-effect :install-program-from-stack)
+
 
 ;; hosting
 

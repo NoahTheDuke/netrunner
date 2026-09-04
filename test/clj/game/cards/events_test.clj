@@ -7588,7 +7588,6 @@
       (is (= 1 (-> (prompt-map :runner) :choices count)) "Runner has 1 choice")
       (is (= ["Stack"] (prompt-buttons :runner)) "Runner's only choice is Stack")))
 
-
 (deftest the-maker-s-eye
   (do-game
      (new-game {:corp {:deck [(qty "Quandary" 5)]

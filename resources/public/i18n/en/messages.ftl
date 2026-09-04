@@ -337,6 +337,7 @@ install-from-grip-with-discount = install {$title} from {-grip}, lowering the co
 
 install-from-stack = install {$title} from {-stack}
 install-from-stack-with-discount = install {$title} from {-stack}, lowering the cost by {$discount}
+install-program-from-heap = install a {-program} from {-heap}
 install-program-from-stack = install a {-program} from {-stack}
 
 # hosting

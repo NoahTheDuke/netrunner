@@ -4371,8 +4371,8 @@
              :req (req (#{:hq :rd} (target-server context))
                             (pos? (or (:subroutines-fired context) 0)))
              :msg (simple-msg
-                   {:effect/type :force-corp-lose-credits
-                    :effect/credits 1})
+                   {:effect/type :force-take-bad-publicity
+                    :effect/count 1})
              :async true
              :effect (effect (gain-bad-publicity state :corp eid 1 {:card card}))}]})
 
@@ -4382,8 +4382,12 @@
                    "Install a program from the stack or heap?"
                    "Install a program from the stack?"))
     :choices (effect ["Stack"
-                   (when (not (zone-locked? state :runner :discard)) "Heap")])
-    :msg (msg "install a program from the " target)
+                      (when-not (zone-locked? state :runner :discard)
+                        "Heap")])
+    :msg (simple-msg
+          (if (= "Stack" target)
+            :install-program-from-stack
+            :install-program-from-heap))
     :waiting-prompt true
     :async true
     :effect (effect
@@ -4411,7 +4415,9 @@
                                         [{:event :runner-turn-ends
                                           :duration :end-of-turn
                                           :req (req (get-in (find-latest state installed-card) [:special :test-run]))
-                                          :msg (msg "move " (:title installed-card) " to the top of the stack")
+                                          :msg (simple-msg
+                                                {:effect/type :add-card-to-top-of-stack
+                                                 :effect/card-str installed-card})
                                           :effect (effect (move state side (find-latest state installed-card) :deck {:front true}))}]))
                                      (effect-completed state side eid)))})
                 card nil))}})
