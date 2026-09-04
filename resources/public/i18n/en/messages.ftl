@@ -381,6 +381,12 @@ prevent-corp-rez-non-ice-on-runner-turn = prevent {-corp(case:"nominative")} fro
 
 increase-rez-cost-first-unrezzed-approached-ice = increase the rez cost of the first unrezzed {-ice} approached by {$credits} {-credit}
 
+# prevention
+
+prevent-core-damage = suffer {$count} core damage
+prevent-meat-damage = prevent {$count} meat damage
+prevent-net-damage = suffer {$count} net damage
+
 # Damage
 
 suffer-meat-damage = suffer {$value} meat damage

@@ -4453,7 +4453,13 @@
                                     (same-card? card (get-in @state [:runner :play-area 0]))
                                     (preventable? context))
                            :condition :active
-                           :msg (msg "prevent " (:remaining context) " " (damage-name state) " damage")
+                           :msg (simple-msg
+                                 (let [t (case (damage-type state)
+                                           :meat :prevent-meat-damage
+                                           (:brain :core) :prevent-core-damage
+                                           :net :prevent-net-damage)]
+                                   {:effect/type t
+                                    :effect/count (:remaining context)}))
                            :effect (effect (prevent-damage state side eid :all))}}]
    :on-play {:async true
              :change-in-game-state {:req (req (or (seq (:hand runner))
