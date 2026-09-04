@@ -4699,9 +4699,12 @@
 
 (defcard "VRcation"
   {:on-play
-   {:msg (msg "draw 4 cards"
-              (when (pos? (:click runner))
-                " and lose [Click]"))
+   {:msg (simple-msg
+          {:effect/type :draw-cards
+           :effect/count 4}
+          (when (pos? (:click runner))
+            {:effect/type :lose-click
+             :effect/count 1}))
     :change-in-game-state {:req (req (or (seq (:deck runner))
                                          (pos? (:click runner))))}
     :async true
