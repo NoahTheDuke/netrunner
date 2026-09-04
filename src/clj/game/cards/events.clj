@@ -4664,7 +4664,9 @@
                           (not (facedown? %))
                           (or (hardware? %)
                               (program? %)))}
-    :msg (msg "move " (:title target) " to [their] Grip")
+    :msg (simple-msg
+          {:effect/type :add-card-to-grip
+           :effect/title target})
     :effect (effect (move state side target :hand))}})
 
 (defcard "Unscheduled Maintenance"
