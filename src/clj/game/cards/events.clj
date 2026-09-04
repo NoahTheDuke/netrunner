@@ -4207,7 +4207,7 @@
 (defcard "Steelskin Scarring"
   {:on-play {:async true
              :msg (simple-msg
-                   {:effec/type :draw-cards
+                   {:effect/type :draw-cards
                     :effect/count 3})
              :change-in-game-state {:req (req (seq (:deck runner)))}
              :effect (effect (draw state side eid 3))}
@@ -4240,7 +4240,9 @@
                              (make-run state side eid target card))}
    :events [{:event :run-ends
              :req (req this-card-run)
-             :msg "take 1 core damage"
+             :msg (simple-msg
+                   {:effect/type :suffer-core-damage
+                    :effect/value 1})
              :async true
              :effect (effect (damage state side eid :brain 1 {:unpreventable true
                                                    :card card}))}]})

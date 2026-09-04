@@ -7243,7 +7243,6 @@
     (damage state :corp :meat 2)
     (is (waiting? state :corp) "Corp is waiting for the runner to pick a steelskin")))
 
-
 (deftest stimhack
   ;; Stimhack - Gain 9 temporary credits and take 1 brain damage after the run
   (do-game
