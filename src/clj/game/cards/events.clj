@@ -4690,7 +4690,9 @@
                :ability {:cost [(->c :x-credits)]
                          :async true
                          :change-in-game-state {:req (req (pos? (x-cost-value eid)))}
-                         :msg (msg "make the corp lose " (x-cost-value eid) " [Credits]")
+                         :msg (simple-msg
+                               {:effect/type :force-corp-lose-credits
+                                :effect/credits (x-cost-value eid)})
                          :effect (effect (wait-for
                                         (lose-credits state :corp (x-cost-value eid))
                                         (continue-ability state side (gain-tags-ability 1) card nil)))}})]})
