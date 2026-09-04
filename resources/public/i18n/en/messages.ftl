@@ -387,6 +387,8 @@ prevent-core-damage = suffer {$count} core damage
 prevent-meat-damage = prevent {$count} meat damage
 prevent-net-damage = suffer {$count} net damage
 
+prevent-corp-advancing-cards-next-turn = prevent {-corp(case: "nominative")} from advancing cards during [their] next turn
+
 # Damage
 
 suffer-meat-damage = suffer {$value} meat damage

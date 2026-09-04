@@ -275,6 +275,8 @@
 (register-effect :prevent-net-damage $count)
 (register-effect :prevent-meat-damage $count)
 
+(register-effect :prevent-corp-advancing-cards-next-turn)
+
 ;; damage
 
 (register-effect :suffer-meat-damage $value)
