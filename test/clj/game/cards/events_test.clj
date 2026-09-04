@@ -7074,7 +7074,11 @@
     (take-credits state :corp)
     (play-from-hand state :runner "Spear Phishing")
     (click-prompt state :runner "HQ")
-    (is (:run @state) "A run has been initiated")))
+    (run-continue state :approach-ice)
+    (run-continue state :movement)
+    (is (last-n-log-contains? state 3 #"encounters Ice Wall protecting HQ at position 0"))
+    (is (last-n-log-contains? state 2 #"uses Spear Phishing to bypass Ice Wall protecting HQ at position 0"))
+    (is (last-n-log-contains? state 1 #"bypasses Ice Wall"))))
 
 (deftest spec-work
   ;; Spec Work

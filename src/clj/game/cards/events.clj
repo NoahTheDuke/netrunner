@@ -181,7 +181,7 @@
                             (same-card? (:ice context) (get-in card [:special :run-again-ice])))
              :msg (simple-msg
                     {:effect/type :bypass-ice
-                     :effect/title (:ice context)})
+                     :effect/card-str (:ice context)})
              :effect (effect (bypass-ice state))}]})
 
 (defcard "Amped Up"
@@ -1756,7 +1756,7 @@
              :req (req (< (get-in card [:special :bypass-count] 0) 2))
              :msg (simple-msg
                    {:effect/type :bypass-ice
-                    :effect/title (get-title (:ice context))})
+                    :effect/card-str (:ice context)})
              :effect (effect (bypass-ice state)
                           (update! state side (update-in card [:special :bypass-count] (fnil inc 0))))}
             {:event :successful-run
@@ -2314,7 +2314,7 @@
                             this-card-is-run-source)
              :msg (simple-msg
                    {:effect/type :bypass-ice
-                    :effect/title (:ice context)})
+                    :effect/card-str (:ice context)})
              :effect (effect (bypass-ice state))}]})
 
 (defcard "Insight"
@@ -3699,7 +3699,7 @@
              :msg (simple-msg
                    :make-a-run
                    {:effect/type :bypass-ice
-                    :effect/title target})
+                    :effect/card-str target})
              :async true
              :effect (effect (register-events
                                state side card
@@ -3884,7 +3884,7 @@
              :once :per-run
              :msg (simple-msg
                    {:effect/type :bypass-ice
-                    :effect/title current-ice})
+                    :effect/card-str current-ice})
              :effect (effect (bypass-ice state))}
             {:event :encounter-ice
              :skippable true
@@ -3898,7 +3898,7 @@
                                            :waiting-prompt true
                                                       :yes-ability {:msg (simple-msg
                                                                           {:effect/type :bypass-ice
-                                                                           :effect/title current-ice})
+                                                                           :effect/card-str current-ice})
                                                          :cost [(->c :click 1)]
                                                          :effect (effect (bypass-ice state))}}}
                                card nil))}]})
@@ -4135,7 +4135,9 @@
    :events [{:event :encounter-ice
              :automatic :bypass
              :req (req (= 1 run-position))
-             :msg (msg "bypass " (:title (:ice context)))
+             :msg (simple-msg
+                   {:effect/type :bypass-ice
+                    :effect/card-str (:ice context)})
              :effect (effect (bypass-ice state))}]})
 
 (defcard "Spec Work"

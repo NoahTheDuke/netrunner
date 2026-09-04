@@ -362,7 +362,7 @@ give-strength-all-icebreakers-during-run = give +{$bonus} strength to all icebre
 
 # ice
 
-bypass-ice = bypass {$title}
+bypass-ice = bypass {$card-str}
 
 prevent-run-ending = prevent the run from ending
 prevent-ice-rezzed-during-run = prevent {-ice-type} from being rezzed during the run

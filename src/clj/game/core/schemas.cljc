@@ -256,7 +256,7 @@
 
 ;; ice
 
-(register-effect :bypass-ice $title)
+(register-effect :bypass-ice $card-str)
 
 (register-effect :prevent-run-ending)
 (register-effect :prevent-ice-rezzed-during-run)
