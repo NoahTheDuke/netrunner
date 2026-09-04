@@ -4206,7 +4206,9 @@
 
 (defcard "Steelskin Scarring"
   {:on-play {:async true
-             :msg "draw 3 cards"
+             :msg (simple-msg
+                   {:effec/type :draw-cards
+                    :effect/count 3})
              :change-in-game-state {:req (req (seq (:deck runner)))}
              :effect (effect (draw state side eid 3))}
    :on-trash {:when-inactive true
@@ -4215,13 +4217,17 @@
               :req (req (let [zone (first (:zone (:card context)))]
                           (#{:hand :deck} zone)))
               :effect (effect (continue-ability
-                                state side {:optional {:prompt "Draw 2 cards?"
-                                            :waiting-prompt true
-                                            :yes-ability {:msg "draw 2 cards"
-                                                          :async true
-                                                          :effect (effect (draw state :runner eid 2))}
-                                            :no-ability
-                                            {:effect (effect (system-msg state side (str "declines to use " (:title card))))}}}
+                                state side
+                                {:optional
+                                 {:prompt "Draw 2 cards?"
+                                  :waiting-prompt true
+                                  :yes-ability {:msg (simple-msg
+                                                      {:effect/type :draw-cards
+                                                       :effect/count 2})
+                                                :async true
+                                                :effect (effect (draw state :runner eid 2))}
+                                  :no-ability
+                                  {:effect (effect (system-msg state side (str "declines to use " (:title card))))}}}
                                 card nil))}})
 
 (defcard "Stimhack"
