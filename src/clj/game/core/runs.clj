@@ -55,12 +55,12 @@
   ([state side card] (get-runnable-zones state side (make-eid state) card nil))
   ([state side card args] (get-runnable-zones state side (make-eid state) card args))
   ([state side eid card {:keys [zones ignore-costs]}]
-   (let [restricted-zones (distinct (flatten (get-effects state side :cannot-run-on-server)))
-         permitted-zones (remove (set restricted-zones) (or zones (get-zones state)))]
+   (let [restricted-zones (into [] (comp cat (distinct)) (get-effects state side :cannot-run-on-server))
+         permitted-zones (into [] (remove (set restricted-zones)) (or zones (get-zones state)))]
      (if ignore-costs
        permitted-zones
-       (filter #(can-pay? state :runner eid card nil (total-run-cost state side card {:server (unknown->kw %)}))
-               permitted-zones)))))
+       (filterv #(can-pay? state :runner eid card nil (total-run-cost state side card {:server (unknown->kw %)}))
+                permitted-zones)))))
 
 (defn can-run-server?
   [state server]

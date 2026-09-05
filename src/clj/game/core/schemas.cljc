@@ -455,6 +455,18 @@
 (register-msg :msg-derez-cards $username $card-strs)
 (register-msg :msg-rfg-n-cards-from-stack $username $count $card-strs)
 
+(register-msg :waiting-corp-default)
+(register-msg :waiting-runner-default)
+(register-msg :waiting-trash-prevention-triggers)
+(register-msg :waiting-pre-damage-triggers)
+(register-msg :waiting-damage-triggers)
+(register-msg :waiting-prevent-when-encountered)
+(register-msg :waiting-prevent-run-ending)
+(register-msg :waiting-prevent-jacking-out)
+(register-msg :waiting-prevent-expose)
+(register-msg :waiting-prevent-bad-publicity)
+(register-msg :waiting-prevent-tags)
+
 (def MsgMap
   (m/schema
    `[:multi {:dispatch :msg/type}

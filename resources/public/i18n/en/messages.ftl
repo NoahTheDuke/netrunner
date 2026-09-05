@@ -837,3 +837,16 @@ extra-turns-remaining = {$username} will have {$turns ->
     *[other] {$turns} extra turns remaning.
 }
 
+## Waiting Prompts
+
+waiting-corp-default = Waiting for {-corp} to make a decision.
+waiting-runner-default = Waiting for {-runner} to make a decision.
+waiting-trash-prevention-triggers = Waiting for your opponent to resolve trash prevention triggers.
+waiting-pre-damage-triggers = Waiting for your opponent to resolve pre-damage triggers.
+waiting-damage-triggers = Waiting for your opponent to resolve damage triggers.
+waiting-prevent-when-encountered = Waiting for your opponent to prevent a "when encountered" ability.
+waiting-prevent-run-ending = Waiting for your opponent to prevent the run from ending.
+waiting-prevent-jacking-out = Waiting for your opponent to prevent you from jacking out.
+waiting-prevent-expose = Waiting for your opponent to prevent an expose.
+waiting-prevent-bad-publicity = Waiting for your opponent to prevent {-bad-publicity}.
+waiting-prevent-tags = Waiting for your opponent to prevent tags.

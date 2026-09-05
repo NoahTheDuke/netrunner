@@ -1562,7 +1562,7 @@
   {:install-req (effect (remove #{"HQ" "R&D" "Archives"} targets))
    :static-abilities [{:type :cannot-run-on-server
                        :req (req (rezzed? card))
-                       :value (effect (second (get-zone card)))}]
+                       :value (effect [(second (get-zone card))])}]
    :events [{:event :successful-run
              :req (req (= :hq (target-server context)))
              :async true

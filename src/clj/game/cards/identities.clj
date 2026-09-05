@@ -1293,7 +1293,7 @@
 (defcard "Jinteki: Replicating Perfection"
   {:static-abilities [{:type :cannot-run-on-server
                        :req (req (no-event? state side :run #(is-central? (:server (first %)))))
-                       :value (effect (map first (get-remotes state)))}]})
+                       :value (effect (mapv first (get-remotes state)))}]})
 
 (defcard "Jinteki: Restoring Humanity"
   {:events [{:event :corp-turn-ends
@@ -1660,7 +1660,7 @@
   {:events [{:event :approach-server
              :async true
              :interactive (effect true)
-             :waiting "Corp to make a decision"
+             :waiting true
              :req (req (pos? (count (:hand corp)))
                             (not (used-this-turn? (:cid card) state)))
              :effect (effect (if (some ice? (:hand corp))

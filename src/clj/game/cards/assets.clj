@@ -1221,7 +1221,7 @@
 (defcard "Front Company"
   {:static-abilities [{:type :cannot-run-on-server
                        :req (req (not (pos? (count (turn-events state side :run)))))
-                       :value (effect (map first (get-remotes state)))}]
+                       :value (effect (mapv first (get-remotes state)))}]
    :rez-req (effect (= (:active-player @state) :corp))
    :events [{:event :run
              :req (req (= :archives (target-server context))
