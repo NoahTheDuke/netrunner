@@ -1660,7 +1660,7 @@
   {:events [{:event :approach-server
              :async true
              :interactive (effect true)
-             :waiting true
+             :waiting-prompt true
              :req (req (pos? (count (:hand corp)))
                             (not (used-this-turn? (:cid card) state)))
              :effect (effect (if (some ice? (:hand corp))
@@ -2163,7 +2163,7 @@
                                (opts-fn top-3))
                              card nil)))}
         score-ev {:event :agenda-scored
-                  :skippabe true
+                  :skippable true
                   :interactive (effect true)
                   :optional {:prompt "Look at the top 3 cards of R&D?"
                              :req (req (seq (:deck corp)))
@@ -2577,7 +2577,7 @@
                                     (corp-install state side eid target nil {:ignore-install-cost true
                                                                              :msg-keys {:install-source card}})))}]
    :abilities [{:label "Gain 2 [Credits]"
-                :action :true
+                :action true
                 :async true
                 :cost [(->c :tag 1) (->c :click 1)]
                 :effect (effect (gain-credits state side eid 2))}]})

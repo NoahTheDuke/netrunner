@@ -20,19 +20,190 @@
          (throw (ex-info msg# {:schema '~(symbol (resolve schema))
                                :value value#}))))))
 
+;; engine schemas
+
+(def Card
+  [:fn {:error/message "should be a card"} card?])
+
+(def Cost
+  (m/schema
+   [:map {:closed true}
+    [:cost/type :keyword]
+    [:cost/amount :int]
+    [:cost/additional :boolean]
+    [:cost/stealth [:maybe [:or :int [:enum :all-stealth]]]]
+    [:cost/maximum [:maybe [:or :int fn?]]]
+    [:cost/offset [:maybe :int]]
+    [:cost/args [:maybe :map]]]))
+
+(def PickCounters
+  (m/schema
+   [:map {:closed true}
+    [:pick-counters/type :keyword]
+    [:value :int]
+    [:title {:optional true} :string]]))
+
 (def Payment
   (m/schema
-   [:map
+   [:map {:closed true}
     [:paid/type :keyword]
     [:paid/side [:enum :corp :runner]]
     [:paid/msg {:optional true} :string]
-    [:paid/value :some]
-    [:paid/targets {:optional true} [:maybe [:sequential :some]]]]))
+    [:paid/value :int]
+    [:paid/x-value {:optional true} :int]
+    [:paid/targets {:optional true} [:maybe [:sequential [:or Card PickCounters]]]]]))
 
-;; individual keys for use in concrete schemas
+(def Eid
+  (m/schema
+   [:map {:closed true}
+    [:eid :int]
+    [:source {:optional true} [:maybe Card]]
+    [:source-type {:optional true} :keyword]
+    [:source-info {:optional true}
+     [:maybe [:map {:closed true}
+              [:ability-idx {:optional true} :int]
+              [:ability-targets [:maybe [:sequential :any]]]]]]
+    [:action {:optional true} [:maybe [:or :keyword :string]]]
+    [:additional-costs {:optional true} [:maybe [:sequential Cost]]]
+    [:cost-paid {:optional true} [:maybe [:map-of :keyword Payment]]]
+    [:latest-payment-str {:optional true} [:maybe :string]]
+    [:result {:optional true} :any]]))
 
-(def card-schema
-  [:fn {:error/message "should be a card"} card?])
+(def Ability
+  (m/schema
+   [:schema {:registry
+             {::msg-core [:or :string fn? [:enum :cost]]
+              ::msg [:or
+                     [:ref ::msg-core]
+                     [:map
+                      [:corp {:optional true} [:maybe [:ref ::msg-core]]]
+                      [:runner {:optional true} [:maybe [:ref ::msg-core]]]]]
+              ::cigs [:or fn?
+                      [:map {:closed true}
+                       [:req fn?]
+                       [:silent {:optional true} [:maybe [:or :boolean fn?]]]
+                       [:pay-cost {:optional true} [:maybe :boolean]]]]
+              ::choices [:or fn?
+                         [:enum :credit :counter]
+                         [:sequential [:or Card :string :nil]]
+                         [:map
+                          [:number fn?]
+                          [:default {:optional true} fn?]]
+                         [:map
+                          [:card {:optional true} fn?]
+                          [:req {:optional true} fn?]
+                          [:all {:optional true} [:or :boolean fn?]]
+                          [:min {:optional true} [:or :int fn?]]
+                          [:max {:optional true} [:or :int fn?]]
+                          [:not-self {:optional true} :boolean]]]
+              ::waiting-prompt [:maybe [:or :boolean [:map [:msg/type :keyword]]]]
+              ::once [:maybe [:enum :per-turn :per-run :per-encounter]]
+              ::ability
+              [:map {:closed true}
+               [:req {:optional true} [:maybe fn?]]
+               [:effect {:optional true} [:maybe fn?]]
+               [:cancel-effect {:optional true} [:maybe [:ref ::ability]]]
+               [:msg {:optional true} [:maybe [:ref ::msg]]]
+               [:implementation {:optional true} :string]
+               [:eid {:optional true} Eid]
+               [:ability-name {:optional true} :string]
+               [:trash? {:optional true} :boolean]
+               [:show-discard {:optional true} :boolean]
+               [:show-opponent-discard {:optional true} :boolean]
+               [:action {:optional true} :boolean]
+               [:cost-label {:optional true} [:maybe [:or :string fn?]]]
+               ;; icebreakers
+               [:break-req {:optional true} fn?]
+               [:break {:optional true} [:or :int fn?]]
+               [:breaks {:optional true} [:set :string]]
+               [:break-cost {:optional true} [:maybe [:or :int Cost [:sequential Cost]]]]
+               [:auto-break-sort {:optional true} [:maybe :int]]
+               [:break-cost-bonus {:optional true} [:maybe fn?]]
+               [:pump {:optional true} :int]
+               [:pump-bonus {:optional true} [:maybe fn?]]
+               [:auto-pump-sort {:optional true} [:maybe :int]]
+               [:auto-pump-ignore {:optional true} [:maybe :boolean]]
+               [:heap-breaker-pump {:optional true} [:or :int :keyword]]
+               [:heap-breaker-break {:optional true} [:or :int :keyword]]
+               [:auto-break-creds-per-sub {:optional true} [:maybe :int]]
+               ;; subroutine
+               [:dynamic {:optional true} [:maybe :keyword]]
+               [:fired {:optional true} [:maybe :boolean]]
+               [:cost-bonus {:optional true} [:maybe [:or :int fn?]]]
+               [:base-play-cost {:optional true} [:maybe [:or Cost [:sequential Cost]]]]
+               [:play-cost-bonus {:optional true} [:maybe fn?]]
+               [:condition {:optional true} :keyword]
+               [:display-side {:optional true} [:enum :corp :runner]]
+               [:change-in-game-state {:optional true} [:ref ::cigs]]
+               [:automatic {:optional true} :keyword]
+               [:rfg-instead-of-trashing {:optional true} :boolean]
+               [:trash-after-resolving {:optional true} :boolean]
+               [:unregister-once-resolved {:optional true} :boolean]
+               [:once-per-instance {:optional true} :boolean]
+               [:offer-bad-pub? {:optional true} [:maybe :int]]
+               [:keep-menu-open {:optional true} [:or :keyword :boolean]]
+               [:cost {:optional true} [:maybe [:sequential Cost]]]
+               [:fake-cost {:optional true} [:maybe [:sequential Cost]]]
+               [:label {:optional true} [:maybe [:or :string fn?]]]
+               [:async {:optional true} true?]
+               [:player {:optional true} [:enum :corp :runner]]
+               [:prompt {:optional true} [:or :string fn?]]
+               [:prompt-type {:optional true} :keyword]
+               [:waiting-prompt {:optional true} [:ref ::waiting-prompt]]
+               [:card {:optional true} [:maybe Card]]
+               [:cards {:optional true} [:sequential Card]]
+               [:choices {:optional true} [:ref ::choices]]
+               [:not-distinct {:optional true} :boolean]
+               [:cancel {:optional true} [:maybe [:ref ::ability]]]
+               [:interactive {:optional true} [:maybe [:or :boolean fn?]]]
+               [:silent {:optional true} [:maybe [:or :boolean fn?]]]
+               [:once {:optional true} [:maybe [:enum :per-turn :per-run :per-encounter]]]
+               [:once-key {:optional true} :keyword]
+               [:install-req {:optional true} fn?]
+               [:legal-zones {:optional true} [:sequential :string]]
+               [:makes-run {:optional true} :boolean]
+               [:when-inactive {:optional true} :boolean]
+               [:additional-ability {:optional true} [:maybe [:ref ::ability]]]
+               [:location {:optional true} :keyword]
+               [:source {:optional true} [:or :string :uuid]] ;; wtf
+               [:cid {:optional true} :string] ;; wtf
+               [:skippable {:optional true} :boolean]
+               [:autoresolve {:optional true} [:or :boolean fn?]]
+               [:optional {:optional true} [:ref ::optional]]
+               [:psi {:optional true} [:ref ::psi]]
+               [:trace {:optional true} [:ref ::trace]]]
+              ::psi
+              [:map {:closed true}
+               [:req {:optional true} fn?]
+               [:equal {:optional true} [:ref ::ability]]
+               [:once {:optional true} [:ref ::once]]
+               [:not-equal {:optional true} [:ref ::ability]]]
+              ::trace
+              [:map {:closed true}
+               [:req {:optional true} fn?]
+               [:label {:optional true} [:maybe :string]]
+               [:msg {:optional true} [:ref ::msg]]
+               [:base [:or :int fn?]]
+               [:successful {:optional true} [:ref ::ability]]
+               [:unsuccessful {:optional true} [:ref ::ability]]
+               [:kicker {:optional true} [:ref ::ability]]
+               [:kicker-min {:optional true} :int]]
+              ::optional
+              [:map {:closed true}
+               [:req {:optional true} fn?]
+               [:prompt [:or :string fn?]]
+               [:waiting-prompt {:optional true} [:ref ::waiting-prompt]]
+               [:once {:optional true} [:ref ::once]]
+               [:change-in-game-state {:optional true} [:ref ::cigs]]
+               [:interactive {:optional true} [:maybe [:or :boolean fn?]]]
+               [:player {:optional true} [:enum :corp :runner]]
+               [:yes-ability {:optional true} [:ref ::ability]]
+               [:no-ability {:optional true} [:ref ::ability]]
+               [:end-effect {:optional true} fn?]
+               [:autoresolve {:optional true} [:or :boolean fn?]]]}}
+    [:ref ::ability]]))
+
+;; i18n schemas
 
 ;; standalone
 (def $username [:username :string])
@@ -42,20 +213,20 @@
 ;; :effect
 (def $add-count [:effect/add-count :int])
 (def $bonus [:effect/bonus :int])
-(def $card-str [:effect/card-str card-schema])
-(def $card-str2 [:effect/card-str2 card-schema])
-(def $card-strs [:effect/card-strs [:sequential card-schema]])
+(def $card-str [:effect/card-str Card])
+(def $card-str2 [:effect/card-str2 Card])
+(def $card-strs [:effect/card-strs [:sequential Card]])
 (def $cards [:effect/cards :int])
 (def $choice [:effect/choice :string])
 (def $count [:effect/count :int])
 (def $credits [:effect/credits :int])
 (def $discount [:effect/discount :int])
 (def $position [:effect/position :int])
-(def $seen [:effect/seen [:sequential card-schema]])
+(def $seen [:effect/seen [:sequential Card]])
 (def $server [:effect/server [:or :string :keyword]])
 (def $server-n [:effect/server-n :int])
-(def $title [:effect/title [:or :string card-schema]])
-(def $titles [:effect/titles [:sequential [:or :string card-schema]]])
+(def $title [:effect/title [:or :string Card]])
+(def $titles [:effect/titles [:sequential [:or :string Card]]])
 (def $top-count [:effect/top-count :int])
 (def $turn [:effect/turn :int])
 (def $turns [:effect/turns :int])

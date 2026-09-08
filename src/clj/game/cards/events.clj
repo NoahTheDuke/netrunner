@@ -150,7 +150,7 @@
 (defcard "Always Have a Backup Plan"
   {:makes-run true
    :on-play {:prompt "Choose a server"
-             :change-on-game-state (effect (seq runnable-servers))
+             :change-in-game-state (effect (seq runnable-servers))
              :choices (effect runnable-servers)
              :async true
              :msg (simple-msg

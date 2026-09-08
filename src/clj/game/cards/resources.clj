@@ -179,7 +179,7 @@
                                  (rezzed? current-ice)
                                  (not (:broken (selector (:subroutines current-ice)))))
                   :break 1
-                  :breaks "All"
+                  :breaks #{"All"}
                   :break-cost [(->c :trash-can)]
                   :cost [(->c :trash-can)]
                   :label (str "Break the " descriptor " subroutine")
@@ -3960,8 +3960,7 @@
                             :async true
                             :effect (effect (trash state side eid card))}
                            (choose-one-helper
-                             {:event :runner-action-phase-ends
-                              :interactive (effect true)}
+                             {:interactive (effect true)}
                              [{:option "Draw 2 cards"
                                :ability {:change-in-game-state {:silent true :req (req (seq (get-in @state [:runner :deck])))}
                                          :msg "draw 2 cards"

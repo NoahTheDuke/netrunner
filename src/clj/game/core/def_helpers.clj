@@ -515,7 +515,6 @@
   ([pred]
    {:label "add card from Archives to HQ"
     :prompt "Choose a card to add to HQ"
-    :does-something (effect (seq (:discard corp)))
     :waiting-prompt true
     :show-discard true
     :choices {:card #(and (corp? %)

@@ -20,6 +20,7 @@
    [game.core.prompts :refer [clear-wait-prompt show-prompt show-select
                               show-wait-prompt]]
    [game.core.say :refer [multi-msg n-last-logs system-msg system-say]]
+   [game.core.schemas :as schemas]
    [game.core.to-string :refer [card-str]]
    [game.core.update :refer [update!]]
    [game.core.winning :refer [check-win-by-agenda]]
@@ -286,6 +287,10 @@
       (let [ability (assoc-in ability [:eid :source] card)
             ab (select-ability-kw ability)
             ability-fn (get @ability-types ab)]
+        ; NOTE (noah, 2026-09):
+        ; i don't think we want to actually validate all ability maps, that'll lead to weird bugs and we don't have good
+        ; observability right now. but during dev, please turn this one.
+        ; (schemas/assert ability schemas/Ability)
         (cond
           ab (ability-fn state side ability card targets)
           choices (check-choices state side ability card targets)

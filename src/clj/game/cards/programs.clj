@@ -1595,7 +1595,7 @@
                   :req (req (active-encounter? state)
                                  (< 1 (count (remove :broken (:subroutines current-ice)))))
                   :break 1 ;technically not correct, but will only be used by the engine to check for breaking abilities
-                  :breaks "All"
+                  :breaks #{"All"}
                   :break-cost [(->c :trash-can)]
                   :cost [(->c :trash-can)]
                   :prompt "Choose the subroutine to NOT break"

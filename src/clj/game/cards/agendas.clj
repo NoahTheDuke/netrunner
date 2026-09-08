@@ -1102,7 +1102,6 @@
   (let [abi {:prompt "Choose a card to add to the bottom of R&D"
              :label "add card to bottom of R&D"
              :show-discard true
-             :event :corp-turn-begins
              :once :per-turn
              :choices {:card #(and (corp? %)
                                    (in-discard? %))}
@@ -1116,6 +1115,7 @@
                                       (is-scored? state :corp card)))}
      :abilities [abi]
      :events [(assoc abi
+                     :event :corp-turn-begins
                      :change-in-game-state {:req (req (seq (:discard corp))) :silent true})]}))
 
 (defcard "Helium-3 Deposit"
@@ -2319,9 +2319,9 @@
                                                 (effect-completed state side eid)
                                                 (continue-ability
                                                   state side
-                                                  {:cost (if (= target "Pay 1 [Credit]")
-                                                           (->c :credit 1)
-                                                           (->c :trash-from-hand 1))
+                                                  {:cost [(if (= target "Pay 1 [Credit]")
+                                                            (->c :credit 1)
+                                                            (->c :trash-from-hand 1))]
                                                    :change-in-game-state {:req (req enc-ice (rezzed? enc-ice))}
                                                    :msg (msg "make the runner encounter " (card-str state enc-ice) " again")
                                                    :async true

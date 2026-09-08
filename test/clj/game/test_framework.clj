@@ -188,8 +188,10 @@
         (let [parsed-number (Integer/parseInt choice)]
           (when-not (do-action "choice" state side {:choice parsed-number :eid (:eid (get-prompt state side))})
             (is' (not true) (str "Parsed number " parsed-number " is incorrect somehow"))))
-        (catch Exception _
-          (is' (number? (Integer/parseInt choice)) (expect-type "number string" choice))))
+        (catch Exception ex
+          (if (number? (Integer/parseInt choice))
+            (throw ex)
+            (is' (number? (Integer/parseInt choice)) (expect-type "number string" choice)))))
 
       (= :trace (:prompt-type prompt))
       (try
@@ -200,9 +202,11 @@
             (is' (<= int-choice (:choices prompt))
                  (str (utils/side-str side) " expected to pay [ "
                       int-choice " ] to trace but couldn't afford it."))))
-        (catch Exception _
-          (is' (number? (Integer/parseInt choice))
-               (expect-type "number string" choice))))
+        (catch Exception ex
+          (if (number? (Integer/parseInt choice))
+            (throw ex)
+            (is' (number? (Integer/parseInt choice))
+                 (expect-type "number string" choice)))))
 
       ;; List of card titles for auto-completion
       (:card-title choices)
