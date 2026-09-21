@@ -1,7 +1,9 @@
 {:config-paths ["../resources/clj-kondo.exports/netrunner"]
  :linters
  {:unused-binding {:exclude-defmulti-args true
-                   :exclude-destructured-as true}
+                   :exclude-destructured-as true
+                   :exclude-destructured-keys-in-fn-args true}
+  :clojure-lsp/unused-public-var {:level :off}
   :unresolved-symbol
   {:exclude [(game.test-framework/do-game [state get-corp get-runner get-run refresh
                                            hand-size prompt-map prompt-button
@@ -9,7 +11,6 @@
                                            prompt-fmt])]}
   :unused-namespace {:exclude ["game.core.*"]}
   :refer-all {:level :off}
-  :clojure-lsp/unused-public-var {:level :off}
   }
  :lint-as {game.test-framework/before-each clojure.core/let
            reagent.core/with-let clojure.core/let
@@ -24,5 +25,7 @@
            monger.operators/defoperator clojure.core/def
            monger.query/with-collection clojure.core/->
            }
+ :hooks {:analyze-call {jinteki.i18n/simple-msg hooks.netrunner/effect
+                        jinteki.i18n/msg-with-cost hooks.netrunner/effect}}
  :output {:langs true}
  }

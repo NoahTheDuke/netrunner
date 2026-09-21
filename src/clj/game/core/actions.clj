@@ -568,8 +568,8 @@
         (wait-for (pay state side (make-eid state eid) card total-cost)
                   (dotimes [_ times-pump]
                     (resolve-ability state side (dissoc pump-ability :cost :msg) (get-card state card) nil))
-                  (let [payment-eid async-result
-                        payment-str (:msg payment-eid)
+                  (let [payment-eid (make-eid state (select-keys async-result [:cost-paid]))
+                        payment-str (:msg async-result)
                         sub-groups-to-break (if (pos? subs-broken-at-once)
                                               (partition subs-broken-at-once subs-broken-at-once nil (remove :broken (:subroutines current-ice)))
                                               [(remove :broken (:subroutines current-ice))])]
