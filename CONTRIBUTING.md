@@ -6,11 +6,15 @@ All contributions to the project (bug/feature reports, pull requests) are very w
 
 This is important so it must go up front.
 
-Jinteki.net is built by humans for humans. We are not interested in drive-by PRs, thousand-word issues, or slop of any kind. If you are willing and interested to put in the work to learn the code base, to speak human to human with others, to share and be shared with, we welcome you. If you only wish to pad your stats, or to sit back while a program writes your issues, your comments, your code, or your slack messages, then we are not interested in your contributions.
+Jinteki.net is built by humans for humans. We volunteer our time and our energy to jnet because we enjoy it, because the work is the work. We're not interested in drive-by PRs, thousand-word issues, or slop of any kind. If you are willing and interested to put in the work to learn the code base, to connect with others, to share and be shared with, we welcome you. If you only wish to pad your stats or to use llms without review or consideration, then we are not interested in your contributions.
 
-As a dev team, we understand that it is increasingly hard to avoid using these tools and don't outright reject them, but we have no interest in accepting purely llm-based works from anyone, new dev or old. We volunteer our time and our energy to jnet because we enjoy it, because the work is the work. If you wish to use an llm to help answer a question or to craft a change, then we ask that you limit it to what is necessary, not what is possible.
+Regardless of the moral or ethical considerations for these tools, they must be held to the same or higher standards than human-crafted contributions. We expect that all users of such tools spend time to understand the changes the tools make to ensure the changes work as desired, and to be able to discuss with the team. No matter what tools you use or how you accomplish it, you own the code you submit and will be responsible for it.
 
-To be clear, if you are a new contributor and use these tools to generate your issues or PRs, then we will close and/or reject your contributions. If you do not put in the effort to write it, then we will not put in the effort to read and understand it.
+If you wish to use an llm or similar tool to help answer a question or to craft a change, then we ask that you limit it to what is necessary, not what is possible. Alongside that, there's little-to-no interest in accepting llm-based changes from unknown devs, as they are a vector for bad-faith actors to spam contributions. (If you're active in the netrunner community (Stimslack, GLC, you know an existing dev in real life, etc), that counts as "known".)
+
+We don't accept llm-based/ai-based translations of any kind. It's important that the text says exactly what it's supposed to, matching existing community norms and standards for a given language. Even tho machine translation is quite powerful, this is a niche game with _very_ specific terminology.
+
+On that note, we ask that you hand-write all of your text communications on github and in the dev slack (if you join it). Regardless of intent or value, this is a hard rule.
 
 ## Issues - Bug Reports & Feature Requests
 
